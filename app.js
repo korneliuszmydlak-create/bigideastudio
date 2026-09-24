@@ -377,6 +377,63 @@
     onScroll();
   }
 
+  /* 6a. Głębia między sekcjami (desktop od 1100 px). Treść pola jedzie wolniej niż jego tło:
+     przy wejściu dogania pole od dołu, przy wyjściu zostaje w tyle, gaśnie i chowa się
+     pod następnym polem, które wjeżdża na nią jak kurtyna. Przesuwamy tylko .wrap, nigdy
+     samą sekcję — tła, lepkie kadry (Obszary) i pomiary sceny oraz kurtyny zostają nietknięte.
+     data-warstwa w markupie mówi, którą połowę ruchu dostaje pole: wejscie, wyjscie albo obie.
+     Telefon, tablet w pionie i ograniczony ruch: nic się nie dzieje, układ jak bez skryptu. */
+  var warstwy = [].slice.call(document.querySelectorAll('[data-warstwa]')).map(function (sec) {
+    var jak = sec.getAttribute('data-warstwa');
+    return { sec: sec, el: sec.querySelector('.wrap'), we: /wejscie/.test(jak), wy: /wyjscie/.test(jak) };
+  }).filter(function (w) { return w.el; });
+
+  if (warstwy.length && !reduced && 'requestAnimationFrame' in window) {
+    var mqGlebia = window.matchMedia('(min-width: 1100px)');
+    var glebiaOn = false, gTick = false;
+
+    var liczGlebie = function () {
+      gTick = false;
+      if (!glebiaOn) return;
+      var vh = window.innerHeight || 1;
+      var dWe = Math.min(vh * .12, 120);   // o tyle treść odstaje od pola, gdy pole dopiero wchodzi
+      var dWy = Math.min(vh * .28, 260);   // o tyle zostaje w tyle, gdy pole znika u góry
+      warstwy.forEach(function (w) {
+        var r = w.sec.getBoundingClientRect();
+        var y = 0, o = 1;
+        if (w.we && r.top > 0) y += clamp01(r.top / vh) * dWe;
+        if (w.wy && r.bottom < vh) {
+          var e = clamp01(1 - r.bottom / vh);
+          y += e * dWy;
+          o = 1 - e * .55;
+        }
+        w.el.style.setProperty('--glebia', y.toFixed(1) + 'px');
+        w.el.style.setProperty('--glebia-krycie', o.toFixed(3));
+      });
+    };
+
+    var trybGlebi = function () {
+      glebiaOn = mqGlebia.matches;
+      document.documentElement.classList.toggle('glebia', glebiaOn);
+      warstwy.forEach(function (w) {
+        w.el.classList.toggle('warstwa', glebiaOn);
+        if (!glebiaOn) {
+          w.el.style.removeProperty('--glebia');
+          w.el.style.removeProperty('--glebia-krycie');
+        }
+      });
+      liczGlebie();
+    };
+
+    trybGlebi();
+    window.addEventListener('scroll', function () {
+      if (glebiaOn && !gTick) { gTick = true; window.requestAnimationFrame(liczGlebie); }
+    }, { passive: true });
+    window.addEventListener('resize', liczGlebie);
+    if (mqGlebia.addEventListener) mqGlebia.addEventListener('change', trybGlebi);
+    else if (mqGlebia.addListener) mqGlebia.addListener(trybGlebi);
+  }
+
   /* 7. Kurtyna i pasek. Hero przypięte, „Punkt wyjścia” najeżdża na nie od dołu.
      --hero-top: przy hero wyższym niż okno (niski telefon) hero najpierw przewija się
      do końca i dopiero wtedy staje — inaczej dół wejścia byłby nie do zobaczenia.
@@ -417,12 +474,16 @@
   }
 
   /* 7a. Teza spod belek. Tekst dzielony na słowa (każde razem ze spacją za nim, więc belki
-     łączą się w ciągły pas). Postęp liczony od wejścia pola na ekran do chwili, gdy zasłoni
-     hero: dolne 90% drogi. Słowa przed czołem są jawne, 7 kolejnych stoi pod belką,
-     reszta czeka niewidoczna. Przy ograniczonym ruchu i bez skryptu tekst stoi w całości. */
+     łączą się w ciągły pas). Słowa przed czołem są jawne, 7 kolejnych stoi pod belką,
+     reszta czeka niewidoczna. Przy ograniczonym ruchu i bez skryptu tekst stoi w całości.
+     Dwie poprawki pod desktop:
+     a) Czoło nie skacze za pozycją, tylko ją goni (~0,25 s). Kółko myszy przewija
+        po ~100 px — wcześniej jeden „ząbek” odsłaniał naraz 8 słów i animacji nie było widać.
+     b) Od 1100 px odsłanianie kończy się, gdy akapit dojdzie do 10% wysokości ekranu,
+        a nie do 25% — ostatnie słowa odsłaniają się już na zatrzymanym polu, nie w trakcie kurtyny. */
   var redact = document.querySelector('[data-redact]');
 
-  if (redact && !reduced) {
+  if (redact && !reduced && 'requestAnimationFrame' in window) {
     var slowa = [];
     var tnij = function (node) {
       [].slice.call(node.childNodes).forEach(function (n) {
@@ -444,16 +505,21 @@
     };
     tnij(redact);
 
-    var FALA = 7, czolo = -1, rTick = false;
+    var FALA = 7, TAU_R = 240;
+    var mqSzeroki = window.matchMedia('(min-width: 1100px)');
+    var celR = 0, pokazR = -1, czolo = -1, rBiegnie = false, rOstatnio = 0;
     redact.classList.add('is-redact');
 
-    var odslon = function () {
-      rTick = false;
+    // Gdzie czoło powinno stać przy obecnej pozycji przewinięcia (w słowach, ułamkowo).
+    var liczCel = function () {
       var vh = window.innerHeight || 1;
       var top = redact.getBoundingClientRect().top;
-      // start: akapit na 95% wysokości ekranu; koniec: akapit na 25% (pole już zasłania hero)
-      var p = clamp01((vh * .95 - top) / (vh * .7));
-      var nowe = Math.round(p * (slowa.length + FALA));
+      var koniec = mqSzeroki.matches ? .1 : .25;   // akapit na tej wysokości = wszystko odsłonięte
+      var p = clamp01((vh * .95 - top) / (vh * (.95 - koniec)));
+      return p * (slowa.length + FALA);
+    };
+
+    var rysuj = function (nowe) {
       if (nowe === czolo) return;
       czolo = nowe;
       slowa.forEach(function (s, i) {
@@ -463,28 +529,49 @@
       });
     };
 
+    var klatkaR = function (teraz) {
+      var dt = rOstatnio ? Math.min(64, teraz - rOstatnio) : 16;
+      rOstatnio = teraz;
+      pokazR += (celR - pokazR) * (1 - Math.exp(-dt / TAU_R));
+      if (Math.abs(celR - pokazR) < .3) pokazR = celR;
+      rysuj(Math.round(pokazR));
+      if (pokazR !== celR) window.requestAnimationFrame(klatkaR);
+      else { rBiegnie = false; rOstatnio = 0; }
+    };
+
+    var odslon = function () {
+      celR = liczCel();
+      if (pokazR < 0) { pokazR = celR; rysuj(Math.round(pokazR)); return; }   // start: bez gonienia
+      if (!rBiegnie) { rBiegnie = true; window.requestAnimationFrame(klatkaR); }
+    };
+
     odslon();
-    window.addEventListener('scroll', function () {
-      if (!rTick) { rTick = true; window.requestAnimationFrame(odslon); }
-    }, { passive: true });
+    window.addEventListener('scroll', odslon, { passive: true });
     window.addEventListener('resize', odslon);
   }
 
   /* 8. Forma w hero: kropka ze znaku, która się rozlewa. Siedem punktów na okręgu,
-     każdy z własnym, wolnym oddechem promienia; przez punkty idzie gładka krzywa
-     (Catmull-Rom → Bézier). Całość powoli się obraca. Pętla działa tylko wtedy,
-     gdy hero jest na ekranie. Przy ograniczonym ruchu zostaje kształt z markupu. */
+     każdy z własnym oddechem promienia; przez punkty idzie gładka krzywa
+     (Catmull-Rom → Bézier). Całość się obraca. Pętla działa tylko wtedy,
+     gdy hero jest na ekranie. Przy ograniczonym ruchu zostaje kształt z markupu.
+     Poprzednie tempo (fale 12 s i 7 s, wychylenie ±14%, obrót 2 min) było niewidoczne —
+     wyglądało na nieruchomą kropkę. Teraz fale 5 s i 3,3 s, wychylenie ±22%, obrót 40 s.
+     Promień bazowy zmniejszony do 150, żeby największe wybrzuszenie (≈183) nie wyszło
+     poza dotychczasowy obrys (≈180) i nie weszło na tekst. */
   var blob = document.querySelector('[data-blob]');
 
   if (blob && !reduced && 'requestAnimationFrame' in window) {
-    var P = 7, R = 158, CX = 200, CY = 200;
+    var P = 7, R = 150, CX = 200, CY = 200;
+    // Strojenie: TEMPO mnoży prędkość wszystkich ruchów, AMP — siłę wybrzuszeń.
+    var TEMPO = 1, AMP = 1;
     var blobOn = true, blobRaf = 0;
 
     var ksztalt = function (t) {
-      var pts = [], rot = t * .00005;
+      t *= TEMPO;
+      var pts = [], rot = t * .00016;
       for (var i = 0; i < P; i++) {
         var a = i / P * Math.PI * 2 + rot;
-        var r = R * (1 + .085 * Math.sin(t * .00052 + i * 2.1) + .055 * Math.sin(t * .00089 + i * 1.3 + 1.7));
+        var r = R * (1 + AMP * (.14 * Math.sin(t * .0012 + i * 2.1) + .08 * Math.sin(t * .0019 + i * 1.3 + 1.7)));
         pts.push([CX + Math.cos(a) * r, CY + Math.sin(a) * r]);
       }
       var d = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
@@ -515,4 +602,70 @@
   /* 9. Rok w nocie prawnej — żeby nie zestarzał się bez powodu. */
   var year = document.querySelector('[data-year]');
   if (year) year.textContent = new Date().getFullYear();
+
+  /* 10. Intro z logo. Klasę html.intro stawia skrypt w <head> (raz na kartę, bez kotwicy,
+     bez ograniczonego ruchu). Pozycję końcową bierzemy ze znaku w hero, więc intro kończy się
+     dokładnie tam, gdzie stoi prawdziwy znak — przejście jest niewidoczne.
+     Kółko, dotyk, klawisz lub klik przerywają intro od razu: nikt nie czeka, jeśli nie chce. */
+  var introRoot = document.documentElement;
+  var znakHero = document.querySelector('.hero .bis-logo svg');
+
+  if (introRoot.classList.contains('intro')) {
+    var zakonczono = false, introEl = null, timery = [];
+
+    var zakoncz = function (odRazu) {
+      if (zakonczono) return;
+      zakonczono = true;
+      timery.forEach(clearTimeout);
+      ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(function (t) {
+        window.removeEventListener(t, przerwij);
+      });
+      introRoot.classList.add('intro-gotowe');
+      introRoot.classList.remove('intro');           // animacje hero ruszają spod planszy
+      if (!introEl) return;
+      if (odRazu) { introEl.remove(); return; }
+      introEl.classList.add('is-koniec');
+      setTimeout(function () { if (introEl) introEl.remove(); }, 400);
+    };
+    var przerwij = function () { zakoncz(true); };
+
+    try { sessionStorage.setItem('bis-intro', '1'); } catch (e) {}
+
+    if (!znakHero || reduced) {
+      zakoncz(true);
+    } else {
+      var cel = znakHero.getBoundingClientRect();
+      var vw = window.innerWidth, vhI = window.innerHeight;
+      var g = Math.min(64, Math.max(20, vw * .05));              // ten sam margines co --gutter
+      var s = Math.min((vw - 2 * g) / cel.width, vhI * .42 / cel.height);  // znak na całą szerokość, max 42% wysokości
+      var dx = g - cel.left;
+      var dy = (vhI - g * .7 - cel.height * s) - cel.top;          // dociśnięty do dołu ekranu
+
+      introEl = document.createElement('div');
+      introEl.className = 'intro';
+      introEl.setAttribute('aria-hidden', 'true');
+      introEl.innerHTML = '<div class="intro-panel"></div><div class="intro-logo"></div>';
+      var logoBox = introEl.querySelector('.intro-logo');
+      logoBox.appendChild(znakHero.cloneNode(true));
+      logoBox.style.left = cel.left + 'px';
+      logoBox.style.top = cel.top + 'px';
+      logoBox.style.width = cel.width + 'px';
+      logoBox.style.height = cel.height + 'px';
+      logoBox.style.transform = 'translate3d(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px,0) scale(' + s.toFixed(4) + ')';
+
+      document.body.appendChild(introEl);
+      introRoot.classList.add('intro-gotowe');       // zasłona z CSS schodzi, plansza już stoi
+
+      ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(function (t) {
+        window.addEventListener(t, przerwij, { passive: true });
+      });
+
+      // Dwie klatki: przeglądarka musi najpierw narysować stan startowy, inaczej przejście nie ruszy.
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () { introEl.classList.add('is-1'); });
+      });
+      timery.push(setTimeout(function () { introEl.classList.add('is-2'); }, 1100));
+      timery.push(setTimeout(function () { zakoncz(false); }, 2300));
+    }
+  }
 })();

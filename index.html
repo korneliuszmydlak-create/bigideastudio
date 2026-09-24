@@ -7,6 +7,9 @@
 <meta name="description" content="Growth management i kampanie płatne dla e-commerce i firm pozyskujących klientów z reklam. Jeden plan dla kampanii, strony i marki.">
 
 <meta name="theme-color" content="#2B3AFF">
+<!-- Strona ma jeden, jasny zestaw kolorów na każdym urządzeniu. „only light” prosi przeglądarkę,
+     żeby nie przyciemniała jej sama, gdy telefon jest w trybie ciemnym. -->
+<meta name="color-scheme" content="only light">
 <link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="icon" href="bis-favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon-180.png">
@@ -26,8 +29,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&display=swap">
 <!-- ?v= wymusza pobranie nowej wersji mimo pamięci podręcznej przeglądarki i Cloudflare.
      Przy każdym wdrożeniu CSS lub JS podbij numer w obu linijkach. -->
-<link rel="stylesheet" href="style.css?v=16">
-<script src="app.js?v=16" defer></script>
+<link rel="stylesheet" href="style.css?v=20">
+<!-- Intro z logo (app.js, punkt 10). Decyzja zapada tu, przed pierwszym malowaniem,
+     żeby hero nie mignęło przed zasłoną. Intro gra raz na kartę przeglądarki, nie przy
+     wejściu na kotwicę (np. #kontakt) i nie przy ograniczonym ruchu. -->
+<script>
+try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&!sessionStorage.getItem('bis-intro'))document.documentElement.classList.add('intro')}catch(e){}
+</script>
+<script src="app.js?v=20" defer></script>
 </head>
 <body>
 
@@ -96,7 +105,9 @@
           </a>
         </div>
 
-        <!-- Powiększona kropka ze znaku. Kształt w atrybucie d to klatka spoczynkowa —
+        <!-- Powiększona kropka ze znaku. Na telefonie CSS stawia ją nad nagłówkiem (order),
+             w kodzie zostaje za tekstem, żeby czytnik ekranu zaczynał od nagłówka.
+             Kształt w atrybucie d to klatka spoczynkowa —
              app.js (punkt 8) przelicza go w każdej klatce. Bez skryptu forma stoi nieruchomo. -->
         <div class="hero-form" aria-hidden="true">
           <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" focusable="false">
@@ -105,23 +116,13 @@
         </div>
       </div>
 
-      <!-- Znak przewijania: jedna cienka kreska ze strzałką, na osi strony.
-           Rysuje się raz przy wejściu, potem lekko opada i wraca. -->
-      <a class="scroll-cue" href="#punkt-wyjscia" aria-label="Przewiń do kolejnej sekcji">
-        <svg viewBox="0 0 18 140" aria-hidden="true" focusable="false">
-          <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path class="cue-line" pathLength="100" d="M9 1V137" vector-effect="non-scaling-stroke"/>
-            <path class="cue-head" pathLength="100" d="M2 130l7 8 7-8" vector-effect="non-scaling-stroke"/>
-          </g>
-        </svg>
-      </a>
 
     </div>
   </section>
 
   <!-- 2 · BIEL: teza. Kurtyna na hero — pole ma co najmniej wysokość ekranu,
        żeby zasłoniło wejście w całości, zanim oba ruszą dalej razem. -->
-  <section class="band band--paper punkt" id="punkt-wyjscia" aria-label="Punkt wyjścia">
+  <section class="band band--paper punkt" id="punkt-wyjscia" aria-label="Punkt wyjścia" data-warstwa="wyjscie">
     <div class="wrap">
       <!-- data-redact: tekst wyłania się słowo po słowie spod czarnych belek w miarę przewijania (app.js, punkt 7a). -->
       <div class="prose prose--stmt" data-redact>
@@ -136,7 +137,7 @@
        Pogrubiony fragment niesie sens przy skanowaniu wzrokiem, reszta dopowiada.
        Kreski rysują się od lewej, pozycje wchodzą kaskadą (app.js, punkt 2a).
        Po najechaniu wiersz dostaje pełne, grafitowe zaznaczenie. -->
-  <section id="dla-kogo" class="band band--mist kwal" aria-labelledby="kwal-tytul">
+  <section id="dla-kogo" class="band band--mist kwal" aria-labelledby="kwal-tytul" data-warstwa="wejscie wyjscie">
     <div class="wrap">
       <h2 class="h-sec h-sec--wide" id="kwal-tytul" data-mask>Dla kogo pracuję</h2>
 
@@ -165,7 +166,7 @@
        i co najmniej jednego sąsiada, więc układ czyta się jako jedna całość.
        Przy wejściu koła zjeżdżają się z rozsuniętych pozycji do środka (app.js, punkt 3).
        Koło to wyjątek od border-radius:0, bierze się wprost z kropki w znaku. -->
-  <section id="kompetencje" class="band band--paper">
+  <section id="kompetencje" class="band band--paper" data-warstwa="wejscie wyjscie">
     <div class="wrap">
       <h2 class="h-sec h-sec--wide" data-mask>Pięć obszarów,<br>jedna odpowiedzialność.</h2>
 
@@ -183,8 +184,9 @@
 
   <!-- 5 · MIST: obszary. Na desktopie kadr staje w miejscu, a przewijanie przełącza opisy
        po kolei — zawsze widać dokładnie jeden (app.js, punkt 4). Linia przy liście pokazuje postęp.
+       Bez numeracji „01 / 05” — kolejność niesie lista po lewej i oś postępu.
        Na telefonie opisy są kartami, które nachodzą na siebie. Bez skryptu: zwykła lista. -->
-  <section id="obszary" class="band band--mist obszary" aria-labelledby="obszary-tytul" data-obszary>
+  <section id="obszary" class="band band--mist obszary" aria-labelledby="obszary-tytul" data-obszary data-warstwa="wejscie wyjscie">
     <div class="obszary-tor">
       <div class="obszary-kadr">
         <div class="wrap">
@@ -207,7 +209,6 @@
             <div class="obszary-opisy">
               <article class="obszar" id="obszar-growth" data-obszar>
                 <div data-reveal data-reveal-scope>
-                  <span class="obszar-nr" aria-hidden="true">01 / 05</span>
                   <h3>Growth management</h3>
                   <p>Zarządzam wzrostem firmy jako całością i&nbsp;odpowiadam za to, żeby wzrost sprzedaży był rentowny. Analizuję dane, kampanie, sklep, kreację i&nbsp;markę, aby ustalić, co faktycznie przynosi przychód, a&nbsp;co generuje koszty bez zwrotu. Na tej podstawie przygotowuję plan działań i&nbsp;go wdrażam, przy jednoczesnym trzymaniu dyscypliny kosztowej.</p>
                 </div>
@@ -215,7 +216,6 @@
 
               <article class="obszar" id="obszar-kampanie" data-obszar>
                 <div data-reveal data-reveal-scope>
-                  <span class="obszar-nr" aria-hidden="true">02 / 05</span>
                   <h3>Kampanie płatne</h3>
                   <p>Konfiguruję pomiar i&nbsp;strukturę kont, nadzoruję teksty i&nbsp;dobieram kreacje. Efekty oceniam przez koszt pozyskania zamówienia lub leada i&nbsp;marżę po kosztach reklamy, sprawdzając je w&nbsp;danych sklepu, nie tylko w&nbsp;panelach reklamowych.</p>
                   <ul class="comp-tags" aria-label="Kanały kampanii płatnych">
@@ -230,7 +230,6 @@
 
               <article class="obszar" id="obszar-sklep" data-obszar>
                 <div data-reveal data-reveal-scope>
-                  <span class="obszar-nr" aria-hidden="true">03 / 05</span>
                   <h3>Sklep, ścieżka zakupowa i&nbsp;konwersja</h3>
                   <p>Analizuję ścieżkę zakupową i&nbsp;wskazuję, gdzie sklep traci klientów: na karcie produktu, w&nbsp;koszyku, przy wyborze dostawy i&nbsp;płatności. Na podstawie danych i&nbsp;nagrań sesji projektuję zmiany, a&nbsp;ich wdrożenie prowadzę razem z&nbsp;deweloperem. Gdy zmiana wymaga przebudowy sklepu, piszę brief i&nbsp;odbieram prace od Twojego zespołu lub sprawdzonego podwykonawcy.</p>
                 </div>
@@ -238,7 +237,6 @@
 
               <article class="obszar" id="obszar-strategia" data-obszar>
                 <div data-reveal data-reveal-scope>
-                  <span class="obszar-nr" aria-hidden="true">04 / 05</span>
                   <h3>Strategia i&nbsp;marka</h3>
                   <p>Określam, do kogo marka mówi i&nbsp;czym się wyróżnia, a&nbsp;potem pilnuję, żeby kampanie, sklep i&nbsp;media społecznościowe mówiły tym samym głosem. Od 14 lat tworzę strategie marek modowych i&nbsp;FMCG. Odpowiadałem między innymi za rebranding dużej sieci sklepów odzieżowych: od koncepcji po wdrożenie w&nbsp;sklepach i&nbsp;komunikację z&nbsp;klientami.</p>
                 </div>
@@ -246,7 +244,6 @@
 
               <article class="obszar" id="obszar-kreacja" data-obszar>
                 <div data-reveal data-reveal-scope>
-                  <span class="obszar-nr" aria-hidden="true">05 / 05</span>
                   <h3>Koncepcje kreatywne i&nbsp;produkcja</h3>
                   <p>Tworzę koncepcje, które da się streścić w&nbsp;jednym zdaniu i&nbsp;konsekwentnie przełożyć na reklamy, sklep oraz media społecznościowe. Przygotowuję briefy, dobieram wykonawców i&nbsp;nadzoruję produkcję zdjęć produktowych, sesji wizerunkowych i&nbsp;wideo do reklam. Koszt realizacji szacuję, zanim przedstawię pomysł.</p>
                 </div>
@@ -261,7 +258,7 @@
   <!-- 6 · BIEL: kto za tym stoi. Portret stoi na kole Ultra — tej samej kropce co w znaku
        i w hero. Koło rośnie, portret odsłania się od dołu, w tle sunie nazwisko.
        Dół portretu jest dociśnięty do krawędzi pola, więc cięcie w pasie czyta się jako zamierzone. -->
-  <section id="o-mnie" class="band band--paper omnie" aria-labelledby="omnie-tytul">
+  <section id="o-mnie" class="band band--paper omnie" aria-labelledby="omnie-tytul" data-warstwa="wejscie wyjscie">
     <p class="omnie-tlo" aria-hidden="true" data-drift>Korneliusz Mydlak</p>
 
     <div class="wrap omnie-uklad">
@@ -287,6 +284,10 @@
     </div>
   </section>
 
+  <!-- data-warstwa (app.js, punkt 6a): głębia między sekcjami na desktopie.
+       „wejscie” — treść dogania pole od dołu, „wyjscie” — zostaje w tyle i chowa się pod następnym polem.
+       W scenie tylko wejście: pola są tam przezroczyste, więc wyjście pokazałoby dwa teksty naraz. -->
+
   <!-- 7–9 · SCENA: plansza, współpraca i kontakt dzielą jedno tło, które przechodzi płynnie
        Ultra → grafit → Ultra, sterowane pozycją przewinięcia (app.js, punkt 5).
        Każda sekcja zachowuje własną klasę pola — bez skryptu stoją jako trzy zwykłe pola. -->
@@ -301,7 +302,7 @@
 
   <!-- 8 · GRAFIT: współpraca. Nagłówek rozcięty na dwie kolumny i dwie wysokości.
        Kroki bez numerów — kolejność niesie układ kolumn i znaczniki <ol>. -->
-  <section id="wspolpraca" class="band band--ink wspolpraca" data-ton="ink">
+  <section id="wspolpraca" class="band band--ink wspolpraca" data-ton="ink" data-warstwa="wejscie">
     <div class="wrap">
       <h2 class="wsp-tytul">
         <span class="wsp-pol wsp-pol--1" data-reveal>Pracujemy 1:1,</span>
@@ -331,7 +332,7 @@
   <!-- 9 · ULTRA: wyjście. Jedno słowo na całą szerokość pola.
        LinkedIn stoi w jednym rzędzie z mailem — dwa równorzędne kanały, nie przypis.
        Na dole pełny znak w tle: wysuwa się spod krawędzi i staje w całości. -->
-  <section id="kontakt" class="band band--ultra kontakt" data-ton="ultra">
+  <section id="kontakt" class="band band--ultra kontakt" data-ton="ultra" data-warstwa="wejscie">
     <div class="wrap">
       <h2 class="kontakt-tytul" data-mask>Kontakt.</h2>
 
