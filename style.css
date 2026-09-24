@@ -1528,7 +1528,9 @@ html.intro .hero .mask > i{transform:translateY(115%)}
 html.intro .hero [data-reveal]{opacity:0;transform:translateY(18px)}
 html.intro .blob{animation:none;opacity:0}
 
-.intro{
+/* Plansza intro ma własną klasę. Wcześniej nazywała się tak samo jak znacznik html.intro,
+   więc na czas intro cały dokument dostawał position:fixed i overflow:hidden. */
+.intro-ekran{
   position:fixed;
   inset:0;
   z-index:90;                 /* nad paskiem przyklejonym (50) */
@@ -1537,7 +1539,7 @@ html.intro .blob{animation:none;opacity:0}
   transition:opacity .35s ease;
 }
 
-.intro.is-koniec{opacity:0}
+.intro-ekran.is-koniec{opacity:0}
 
 .intro-panel{
   position:absolute;
@@ -1562,26 +1564,26 @@ html.intro .blob{animation:none;opacity:0}
   transform:translate3d(0,105%,0);
 }
 
-.intro.is-1 .intro-logo svg{
+.intro-ekran.is-1 .intro-logo svg{
   transform:none;
   transition:transform .9s var(--ease-out);
 }
 
 /* Faza 2: pole wjeżdża, znak leci na swoje miejsce. Jedna krzywa dla obu —
    ruszają i hamują razem, więc czytają się jako jeden gest. */
-.intro.is-2 .intro-panel{
+.intro-ekran.is-2 .intro-panel{
   transform:none;
   transition:transform 1.1s cubic-bezier(.76,0,.24,1);
 }
 
-.intro.is-2 .intro-logo{
+.intro-ekran.is-2 .intro-logo{
   transform:none !important;  /* !important: pozycję startową wpisuje skrypt w atrybut style */
   color:#fff;
   --bis-accent:#fff;
   transition:transform 1.1s cubic-bezier(.76,0,.24,1),color .8s ease .25s;
 }
 
-.intro.is-2 .intro-logo path{transition:fill .8s ease .25s}
+.intro-ekran.is-2 .intro-logo path{transition:fill .8s ease .25s}
 
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{

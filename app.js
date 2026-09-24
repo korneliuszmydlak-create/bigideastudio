@@ -642,7 +642,7 @@
       var dy = (vhI - g * .7 - cel.height * s) - cel.top;          // dociśnięty do dołu ekranu
 
       introEl = document.createElement('div');
-      introEl.className = 'intro';
+      introEl.className = 'intro-ekran';   // nie 'intro' — ta nazwa należy do znacznika na <html>
       introEl.setAttribute('aria-hidden', 'true');
       introEl.innerHTML = '<div class="intro-panel"></div><div class="intro-logo"></div>';
       var logoBox = introEl.querySelector('.intro-logo');
