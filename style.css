@@ -96,6 +96,12 @@ a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px}
   .band{padding-block:calc(var(--x) * 7)}
 }
 
+/* Desktop: szerszy oddech między polami. Głębia (app.js, punkt 6a) przesuwa treść tylko w obrębie
+   tego odstępu, więc większy odstęp = wyraźniejsza paralaksa bez zasłaniania tekstu. */
+@media (min-width:1100px){
+  .band{padding-block:calc(var(--x) * 16)}
+}
+
 .band--ultra{
   --bg:var(--bis-accent);
   --fg:#fff;
