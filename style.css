@@ -186,21 +186,7 @@ h1,h2,h3{
 /* Bez etykiet sekcji nagłówek stoi pierwszy w polu — odstęp pod nim niesie już treść. */
 .h-sec + .prose{margin-top:calc(var(--x) * 5)}
 
-/* Etykieta pola Mist: nagłówek w skali podpisu, bo zdanie pod nim pracuje jak nagłówek.
-   Kolor drugorzędny (#575B62 na Mist = 5,6:1) i akcent na jednym wyrazie (5,4:1) —
-   oba powyżej progu AA dla drobnego tekstu, więc etykieta nie potrzebuje belki. */
-.h-sec--label{
-  font-size:.8125rem;
-  font-weight:500;
-  line-height:1.4;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  color:var(--fg-2);
-}
-
-.h-sec--label + .prose--stmt{margin-top:calc(var(--x) * 3)}
-
-/* Teza pola Mist: jedno zdanie w skali planszy, krojem nagłówkowym.
+/* Teza: jedno zdanie w skali planszy, krojem nagłówkowym.
    Waga 500, nie 600 — przy siedmiu linijkach display 600 robi się plamą.
    Miara 30 znaków: dłuższy wiersz przestaje się czytać jednym rzutem oka. */
 .prose--stmt{
@@ -216,12 +202,8 @@ h1,h2,h3{
 /* Pusta kolumna po lewej — oś tekstu wchodzi w pole na wysokości jednej czwartej.
    Tylko na szerokich ekranach: niżej strona musi mieć jedną oś, nie dwie. */
 @media (min-width:1100px){
-  .h-sec--label,
   .prose--stmt{margin-left:24%}
 }
-
-/* jedyne miejsce na stronie, w którym akcent koloruje wyraz — jeden rzeczownik w etykiecie tezy */
-.is-key{color:var(--accent)}
 
 .lead{
   font-size:var(--t-lead);
@@ -230,10 +212,6 @@ h1,h2,h3{
   margin:calc(var(--x) * 3) 0 0;
   text-wrap:pretty;
 }
-
-/* Lead pod nagłówkiem sekcji — dłuższe zdanie, więc szersza miara.
-   Przy 34ch ten tekst rozpadał się na cztery linie. */
-.lead--wide{max-width:48ch}
 
 .prose{max-width:56ch}
 .prose p{margin:0 0 1.15em}
@@ -288,27 +266,16 @@ h1,h2,h3{
 .sticky-cta:hover,
 .sticky-cta:focus-visible{background:#fff;color:var(--bis-accent)}
 
-/* Etykieta zależna od szerokości: na desktopie „Kontakt”, na telefonie „Umów rozmowę”. */
-.sticky-cta-kr{display:none}
-
 @media (max-width:760px){
   .sticky .bis-logo svg{width:120px}
   .sticky-cta{padding:calc(var(--x) * .8) calc(var(--x) * 1.8);font-size:.75rem}
-  .sticky-cta-dl{display:none}
-  .sticky-cta-kr{display:inline}
-}
-
-/* Najwęższe telefony: dłuższa etykieta nie mieści się obok znaku przy pełnym światle. */
-@media (max-width:359px){
-  .sticky .bis-logo svg{width:108px}
-  .sticky-cta{padding-inline:calc(var(--x) * 1.3);letter-spacing:.08em}
 }
 
 /* --------------------------------------------------------------------------
    Plansza wejściowa
    -------------------------------------------------------------------------- */
 
-.hero{padding-block:0}               /* padding siedzi w .hero-inner, żeby pole miało równo 100svh */
+.hero{padding-block:0}               /* padding siedzi w .hero-inner, żeby plansza miała równo 100svh */
 
 .hero-inner{
   min-height:100svh;                 /* svh, bo na telefonie pasek przeglądarki zjada vh */
@@ -355,16 +322,6 @@ h1,h2,h3{
 }
 
 .hero-lead + .btn-connect{margin-top:calc(var(--x) * 3.5)}
-
-/* Podpis pod przyciskiem: odpowiada na „kto to zrobi”, zanim ktoś zdąży zapytać.
-   Kolor drugorzędny na Ultra = 4,6:1 — przechodzi AA dla drobnego tekstu. */
-.hero-note{
-  margin:calc(var(--x) * 2) 0 0;
-  max-width:46ch;
-  font-size:.85rem;
-  line-height:1.45;
-  color:var(--fg-2);
-}
 
 /* --- przycisk „Umówmy rozmowę” ------------------------------------------ */
 
@@ -423,10 +380,14 @@ h1,h2,h3{
   .hero-form{width:min(78vw, 29svh, 440px)}
 }
 
-/* Telefon: bryła znika. Zajmowała dolne ~40% pierwszego ekranu i spychała leed i przycisk
-   pod krawędź — w pierwszym ekranie ważniejsze jest, kto i dla kogo, niż forma. */
+/* Telefon: forma i kreska mniejsze, żeby znak przewijania mieścił się na pierwszym ekranie
+   (przy 390 × 844 hero miało 1015 px i kreska lądowała pod krawędzią). */
 @media (max-width:760px){
-  .hero-form{display:none}
+  .hero-inner{gap:calc(var(--x) * 2.5)}
+  .hero-body{gap:calc(var(--x) * 2.5)}
+  .hero-form{width:min(62vw, 22svh, 300px)}
+  .scroll-cue{padding-block:0}
+  .scroll-cue svg{height:clamp(48px, 7svh, 72px)}
 }
 
 /* W dwóch kolumnach forma wychodzi poza siatkę, w margines strony.
@@ -444,86 +405,107 @@ h1,h2,h3{
   width:100%;
   height:auto;
   overflow:visible;
-  /* Obrót niezsynchronizowany z deformacją — wybrzuszenie wędruje dookoła,
-     przez co bryła się rozlewa, zamiast pulsować w miejscu. */
-  animation:blob-spin 28s linear 1.2s infinite;
 }
 
-@keyframes blob-spin{to{transform:rotate(360deg)}}
-
-/* Pojawia się po tekście, nie przed nim. */
-.blob{
-  animation:blob-in 1.1s ease-out .35s both,
-            blob-morph 8s ease-in-out 1.2s infinite;
-}
+/* Pojawia się po tekście, nie przed nim. Kształt i obrót liczy app.js (punkt 8):
+   animacja CSS atrybutu d nie działa w Safari, a wcześniejsze klatki blob-morph
+   nigdy nie zostały zdefiniowane — dlatego forma stała. */
+.blob{animation:blob-in 1.1s ease-out .35s both}
 
 @keyframes blob-in{from{opacity:0}to{opacity:1}}
 
-/* Deformacja: cztery klatki o identycznej budowie ścieżki (M + 8 × C + Z) — tylko wtedy
-   przeglądarka interpoluje „d” płynnie. Klatka 0/100% = atrybut d w markupie, więc pętla
-   nie ma szwu. Punkty węzłowe odsuwane od środka o ±8%, uchwyty razem z nimi,
-   więc krzywa zostaje gładka. Przeglądarka bez obsługi „d” w CSS pokazuje klatkę spoczynkową. */
-@keyframes blob-morph{
-  0%,100%{d:path("M200.0 36.6C240.0 37.1 291.4 54.3 318.5 81.5C345.6 108.8 363.8 161.8 362.4 200.0C361.1 238.2 337.7 289.7 310.6 310.6C283.5 331.5 234.1 328.3 200.0 325.5C165.9 322.7 135.5 314.7 106.2 293.8C76.8 272.9 28.4 235.9 23.8 200.0C19.2 164.1 49.0 105.6 78.4 78.4C107.8 51.2 160.0 36.1 200.0 36.6Z")}
-  25%{d:path("M200.0 26.8C242.4 27.3 285.0 64.5 310.2 89.8C335.4 115.2 370.4 160.3 368.9 200.0C367.5 239.7 330.8 285.2 305.1 305.1C279.3 324.9 236.8 338.6 200.0 335.5C163.2 332.5 139.4 307.8 111.8 288.2C84.2 268.5 25.0 236.6 20.3 200.0C15.6 163.4 53.5 108.4 82.0 82.0C110.6 55.7 157.6 26.3 200.0 26.8Z")}
-  50%{d:path("M200.0 44.8C238.0 45.2 297.8 44.1 326.8 73.2C355.8 102.4 354.0 164.1 352.7 200.0C351.4 235.9 348.7 296.9 319.4 319.4C290.2 342.0 232.7 323.2 200.0 320.5C167.3 317.8 132.3 320.4 101.5 298.5C70.6 276.5 40.4 233.4 36.1 200.0C31.9 166.6 39.9 99.9 71.1 71.1C102.3 42.3 162.0 44.3 200.0 44.8Z")}
-  75%{d:path("M200.0 31.7C241.2 32.2 288.7 58.7 314.9 85.1C341.2 111.5 376.9 158.7 375.4 200.0C374.0 241.3 326.7 282.5 301.8 301.8C276.8 321.0 234.8 330.9 200.0 328.0C165.2 325.2 131.0 322.7 99.6 300.4C68.2 278.0 37.0 234.1 32.6 200.0C28.2 165.9 47.5 104.7 77.2 77.2C106.9 49.7 158.8 31.2 200.0 31.7Z")}
-}
-
-/* --- odręczny znak przewijania ------------------------------------------ */
+/* --- znak przewijania: kreska ze strzałką na osi strony ------------------ */
 
 .scroll-cue{
-  align-self:flex-start;
+  align-self:center;
   display:block;
-  width:calc(var(--x) * 9);
   color:var(--fg);
   text-decoration:none;
-  transition:opacity .25s ease,transform .4s var(--ease-out);
+  padding:calc(var(--x) * 1) calc(var(--x) * 2);   /* większe pole kliknięcia niż sama kreska */
+  transition:opacity .25s ease;
 }
 
-.scroll-cue:hover{opacity:.72;transform:translateY(4px)}
+.scroll-cue:hover{opacity:.72}
 
-.scroll-cue-mark{
+/* Wysokość steruje całością — szerokość wynika z proporcji viewBox. */
+.scroll-cue svg{
   display:block;
-  width:100%;
-  height:auto;
+  height:clamp(72px, 14svh, 140px);
+  width:auto;
   overflow:visible;
-  animation:cue-sway 5.5s ease-in-out infinite;
+  animation:cue-bob 3.2s ease-in-out 2.2s infinite;
 }
 
-/* Lekkie kołysanie całego dopisku — tyle ruchu, ile ma notatka na kartce,
-   gdy ktoś przewraca stronę. Bez tego znak wygląda jak wklejona grafika. */
-@keyframes cue-sway{
-  0%,100%{transform:rotate(0deg) translateY(0)}
-  50%    {transform:rotate(-2.5deg) translateY(3px)}
-}
-
-/* Kreska rysuje się raz, w kolejności rysowania ręką: kółko, ogon, grot.
-   Długości ścieżek podane z zapasem — nadmiar jest niewidoczny. */
-.cue-ring,.cue-tail,.cue-head{
-  stroke-dasharray:var(--len);
-  stroke-dashoffset:var(--len);
-  animation:cue-draw 1.1s var(--ease-out) both;
-}
-
-.cue-ring{--len:360px;animation-delay:.5s}
-.cue-tail{--len:170px;animation-delay:1.25s}
-.cue-head{--len:40px;animation-delay:1.7s}
+.cue-line,.cue-head{stroke-dasharray:101;stroke-dashoffset:101}
+.cue-line{animation:cue-draw 1.2s var(--ease-out) .6s forwards}
+.cue-head{animation:cue-draw .5s var(--ease-out) 1.5s forwards}
 
 @keyframes cue-draw{to{stroke-dashoffset:0}}
 
-/* Napis siedzi w środku pętli, obrócony razem z nią.
-   Krój strony, nie skryptowy — na stronie pracuje jeden krój i drugi byłby zmianą marki. */
-.cue-word{
-  font-size:23px;
-  font-weight:500;
-  letter-spacing:.01em;
-  fill:currentColor;
-  opacity:0;
-  animation:cue-word-in .8s var(--ease-out) 1.1s forwards;
+/* Lekkie opadanie — sygnał „dalej w dół”, bez migania. */
+@keyframes cue-bob{
+  0%,100%{transform:translateY(0)}
+  50%    {transform:translateY(8px)}
 }
 
-@keyframes cue-word-in{to{opacity:1}}
+/* --------------------------------------------------------------------------
+   Kurtyna: hero stoi, „Punkt wyjścia” wjeżdża na nie od dołu
+   -------------------------------------------------------------------------- */
+
+/* --hero-top podaje app.js: 0, gdy hero mieści się w oknie; ujemne, gdy jest wyższe
+   (niskie telefony) — wtedy hero najpierw przewija się do końca, a dopiero potem staje.
+   --cover (0–1) to postęp zasłaniania: hero lekko ciemnieje i odsuwa się w głąb. */
+.hero{position:relative}
+
+.kurtyna.is-live .hero{
+  position:sticky;
+  top:var(--hero-top,0px);
+  z-index:0;
+}
+
+.kurtyna.is-live .hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:var(--bis-ink);
+  opacity:calc(var(--cover,0) * .32);   /* mocniej — biel w hero szarzała */
+  pointer-events:none;
+}
+
+.kurtyna.is-live .hero-inner{
+  transform:translate3d(0,calc(var(--cover,0) * -6vh),0) scale(calc(1 - var(--cover,0) * .05));
+  transform-origin:50% 100%;
+}
+
+.kurtyna.is-live .punkt{position:relative;z-index:1}
+
+/* Teza ma co najmniej wysokość ekranu — inaczej nie zasłoniłaby hero w całości. */
+.punkt{
+  min-height:100svh;
+  display:flex;
+  align-items:center;
+}
+
+@supports not (height:100svh){
+  .punkt{min-height:100vh}
+}
+
+.punkt .prose--stmt{margin-top:0}
+
+/* Tekst spod belek (app.js, punkt 7a). Każde słowo ma trzy stany:
+   ukryte → zasłonięte grafitową belką → jawne. Czoło odsłaniania idzie za przewijaniem,
+   więc przed nim zawsze stoi kilka belek — jak zaczernienia w dokumencie.
+   Tekst jest cały czas w drzewie dostępności: znika tylko kolor, nie treść. */
+.slowo{position:relative}
+.is-redact .slowo{color:transparent;transition:color .18s ease}
+.is-redact .slowo.is-jawne{color:inherit}
+
+.is-redact .slowo.is-blok::after{
+  content:"";
+  position:absolute;
+  inset:.12em 0 .02em;
+  background:var(--fg);
+}
 
 /* Kanały jako etykiety pod opisem — pięć osobnych pozycji na liście
    rozbiłoby hierarchię pięciu obszarów. */
@@ -545,111 +527,256 @@ h1,h2,h3{
 }
 
 /* --------------------------------------------------------------------------
-   Rozdział „Czym się zajmuję” — jedno hasło, ruch za przewijaniem
+   Dla kogo — dwie listy warunków w układzie tabeli wyników
    -------------------------------------------------------------------------- */
 
-/* Overflow ucina linię, gdy wjeżdża z prawej — bez tego strona dostałaby pasek poziomy.
-   Dolny padding większy o zejście strzałki pod linię bazową. */
-.czym{
-  overflow:hidden;
-  padding-block:calc(var(--x) * 8.4) calc(var(--x) * 10.5);   /* −30% względem 12/15 — krótsza strona na mobile */
-}
+.kwal-blok{margin-top:calc(var(--x) * 8)}
+.kwal-blok + .kwal-blok{margin-top:calc(var(--x) * 11)}
 
-/* Skala od szerokości pola, jak w „Kontakt.”: w spoczynku hasło ze strzałką wypełnia siatkę.
-   Dzielnik 7,55 = zmierzona szerokość „Dla kogo pracuję” (6,82 em; Familjen 600, -0,035em)
-   + odstęp 0,08 + strzałka 0,58, w em, z tym samym zapasem co poprzedni pomiar. Zmiana tekstu, wagi lub kroju wymaga ponownego pomiaru.
-   --p podaje app.js (punkt 6): 0 gdy pole jest na środku ekranu, dodatnie pod nim. */
-.czym-linia{
-  --czym-w:calc(min(100vw, var(--maxw)) - 2 * var(--gutter));
-  display:flex;
-  align-items:flex-end;
-  position:relative;
-  gap:.08em;
-  font-size:calc(var(--czym-w) / 7.55);
-  transform:translate3d(calc(var(--p, 0) * 36vw), 0, 0);
-}
-
-.czym-tytul{
-  font-size:1em;
+/* Etykieta kolumny — waga 600, bez ozdobników: wagę pola niesie lista. */
+.kwal-etykieta{
+  margin:0;
+  font-size:clamp(1.0625rem, 1.4vw, 1.25rem);
   font-weight:600;
-  line-height:1;
-  letter-spacing:-.035em;
-  white-space:nowrap;
-  text-wrap:nowrap;
+  line-height:1.3;
+  letter-spacing:-.01em;
 }
 
-/* Strzałka schodzi pod linię bazową i celuje w schemat kół poniżej. */
-.czym-strzalka{
-  flex:0 0 auto;
-  width:.58em;
-  height:auto;
-  margin-bottom:-.4em;
-  overflow:visible;
+.kwal-lista{
+  margin:calc(var(--x) * 3) 0 0;
+  padding:0;
+  list-style:none;
 }
 
-/* Kreska rysuje się po wejściu pola na ekran: łuk, potem grot.
-   pathLength="100" w markupie, więc długość nie zależy od skali. */
-.js .czym-strzalka path{stroke-dasharray:101;stroke-dashoffset:101}
-[data-draw].is-in .draw-1{animation:czym-rysuj 1s var(--ease-out) .2s forwards}
-[data-draw].is-in .draw-2{animation:czym-rysuj .5s var(--ease-out) .95s forwards}
-
-@keyframes czym-rysuj{to{stroke-dashoffset:0}}
-
-/* Mobile: hasło w dwóch wierszach, strzałka przy drugim — w jednym wierszu
-   wychodziło mniejsze niż nagłówek sekcji pod spodem.
-   Dzielnik 3,83 = „pracuję” (3,10 em) + odstęp + strzałka; „Dla kogo” (3,55 em) mieści się w tym. */
-@media (max-width:760px){
-  .czym-linia{font-size:calc(var(--czym-w) / 3.83)}
-  .czym-tytul{line-height:.98}
-  .czym-l2{display:block}
-  /* strzałka przy drugim wierszu, zaraz za „pracuję” */
-  .czym-strzalka{position:absolute;left:3.18em;bottom:0;margin-bottom:-.4em}
+/* Duża skala, dwie wagi: pogrubienie w kolorze tekstu, dopowiedzenie w drugorzędnym
+   (#575B62 na Mist = 5,6:1). Bez drugiego kroju — różnicę niesie sama waga.
+   Poziomy padding z ujemnym marginesem: tekst stoi na osi kolumny,
+   a zaznaczenie po najechaniu ma zapas z obu stron. */
+.kwal-lista li{
+  position:relative;
+  margin-inline:calc(var(--x) * -2);
+  padding:calc(var(--x) * 3.2) calc(var(--x) * 2);
+  font-size:clamp(1.35rem, 2.55vw, 2.3rem);
+  line-height:1.2;
+  letter-spacing:-.022em;
+  color:var(--fg-2);
+  text-wrap:pretty;
+  /* Zaznaczenie jako tło rosnące od dołu — gradient, bo ::before niesie już kreskę. */
+  background:linear-gradient(var(--fg), var(--fg)) 0 100% / 100% 0 no-repeat;
+  transition:background-size .35s var(--ease-out),color .25s ease;
 }
 
-/* --------------------------------------------------------------------------
-   Dla kogo — kryteria i sytuacje
-   -------------------------------------------------------------------------- */
+.kwal-lista strong{
+  font-weight:700;
+  color:var(--fg);
+  transition:color .25s ease;
+}
 
-/* Dwie kolumny dopiero od 1100 px — niżej listy byłyby za wąskie na zdania. */
-.dla-kogo-uklad{
-  display:grid;
-  gap:calc(var(--x) * 8);
+/* Kreska jako osobny element, żeby mogła rysować się od lewej. Stoi na osi tekstu,
+   nie na krawędzi zaznaczenia. */
+.kwal-lista li + li::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:calc(var(--x) * 2);
+  right:calc(var(--x) * 2);
+  height:1px;
+  background:var(--fg);
+  opacity:.3;
+  transform-origin:0 50%;
+}
+
+/* Po najechaniu: pełny grafit, tekst w kolorze tła (na Mist 16:1).
+   Tylko z kursorem — na dotyku hover przykleja się po tapnięciu. */
+@media (hover:hover){
+  .kwal-lista li:hover{
+    background-size:100% 100%;
+    color:var(--bg);
+  }
+  .kwal-lista li:hover strong{color:var(--bg)}
+  .kwal-lista li:hover::before,
+  .kwal-lista li:hover + li::before{opacity:0}
 }
 
 @media (min-width:1100px){
-  .dla-kogo-uklad{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:calc(var(--x) * 8)}
+  .kwal-blok{
+    display:grid;
+    grid-template-columns:minmax(0,4fr) minmax(0,8fr);
+    gap:calc(var(--x) * 6);
+    align-items:start;
+  }
+  /* Etykieta na wysokości pierwszego wiersza listy, nie nad jego zaznaczeniem. */
+  .kwal-etykieta{position:sticky;top:calc(var(--x) * 12);padding-top:calc(var(--x) * 3.2 + .35em)}
+  .kwal-lista{margin-top:0}
 }
 
-/* H2 i H3 w tej samej skali — kolumny są równorzędne, różni je tylko semantyka. */
-.dla-kogo-h{
-  font-size:clamp(1.9rem, 3.4vw, 3rem);
-  line-height:1.04;
-  letter-spacing:-.03em;
+/* Wejście: kreski rysują się, pozycje podjeżdżają kaskadą. Ukrywamy dopiero,
+   gdy skrypt uzbroił listę (is-armed) — bez JS lista stoi w całości. */
+.kwal-lista.is-armed li{
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity .9s var(--ease-out) calc(var(--i,0) * 110ms),
+             transform .9s var(--ease-out) calc(var(--i,0) * 110ms),
+             background-size .35s var(--ease-out),
+             color .25s ease;
 }
 
-/* Styl kroków ze współpracy (waga 500, krój nagłówkowy), stopień niżej.
-   Zamiast punktorów linie podziału — ta sama linia co w Zakresie usług. */
-.kryteria{
-  margin:calc(var(--x) * 4) 0 0;
-  padding:0;
-  list-style:none;
-  border-bottom:1px solid var(--rule);
+.kwal-lista.is-armed li::before{
+  transform:scaleX(0);
+  transition:transform 1.2s var(--ease-out) calc(var(--i,0) * 110ms),opacity .25s ease;
 }
 
-.kryteria li{
-  border-top:1px solid var(--rule);
-  padding-block:calc(var(--x) * 1.8);
-  font-weight:500;
-  font-size:clamp(1.125rem, 1.6vw, 1.375rem);
-  line-height:1.3;
-  letter-spacing:-.01em;
-  text-wrap:pretty;
+.kwal-lista.is-armed.is-in li{opacity:1;transform:none}
+.kwal-lista.is-armed.is-in li::before{transform:scaleX(1)}
+
+/* --------------------------------------------------------------------------
+   O mnie — portret na kole ze znaku
+   -------------------------------------------------------------------------- */
+
+/* Dół pola bez paddingu: portret stoi na krawędzi sekcji. */
+.omnie{
+  position:relative;
+  overflow:hidden;
+  padding-bottom:0;
 }
 
-.dla-kogo-uwaga{
-  margin:calc(var(--x) * 3) 0 0;
-  max-width:46ch;
+/* Nazwisko w tle — faktura, nie treść. Sunie w poziomie za przewijaniem (--p z app.js). */
+.omnie-tlo{
+  position:absolute;
+  left:0;
+  top:calc(var(--x) * 5);
+  margin:0;
+  white-space:nowrap;
+  font-weight:700;
+  font-size:clamp(5rem, 19vw, 17rem);
+  line-height:.8;
+  letter-spacing:-.05em;
+  color:var(--fg);
+  opacity:.05;
+  pointer-events:none;
+  transform:translate3d(calc(var(--p,0) * -18vw),0,0);
+}
+
+.omnie-uklad{
+  position:relative;
+  display:grid;
+  gap:calc(var(--x) * 6);
+}
+
+/* Mobile: tekst pierwszy, portret na końcu — dociśnięty do dolnej krawędzi pola. */
+.omnie-tekst{order:1}
+
+.omnie-scena{
+  order:2;
+  position:relative;
+  width:min(100%, 420px);
+  margin-inline:auto;
+}
+
+/* Koło: kropka ze znaku w skali portretu. Zewnętrzna ramka niesie paralaksę,
+   wewnętrzna — skalę wejścia; jedna transformacja nadpisywałaby drugą. */
+.omnie-kolo-px{
+  position:absolute;
+  left:2%;
+  top:8%;
+  width:96%;
+  aspect-ratio:1;
+  transform:translate3d(0,var(--px,0px),0);
+}
+
+.omnie-kolo{
+  display:block;
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:var(--bis-accent);
+}
+
+.omnie-portret{position:relative;display:block}
+.omnie-portret img{width:100%}
+
+.js .omnie-kolo{
+  transform:scale(.5);
+  opacity:0;
+  transition:transform 1.6s var(--ease-out),opacity .8s ease;
+}
+
+.js .omnie-portret{
+  clip-path:inset(100% 0 0 0);
+  transition:clip-path 1.5s var(--ease-out) .3s;
+}
+
+.omnie-scena.is-in .omnie-kolo{transform:none;opacity:1}
+.omnie-scena.is-in .omnie-portret{clip-path:inset(0)}
+
+@media (min-width:1000px){
+  .omnie-uklad{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:calc(var(--x) * 8);
+    align-items:end;
+  }
+  .omnie-scena{order:0;width:100%;max-width:540px;margin:0}
+  .omnie-tekst{align-self:center;padding-bottom:calc(var(--x) * 11)}
+}
+
+.omnie-lead{max-width:30ch}
+
+.omnie-proza{margin-top:calc(var(--x) * 4)}
+
+.omnie-proza p{
+  margin:0;
   color:var(--fg-2);
+}
+
+.omnie-proza p + p{margin-top:calc(var(--x) * 2)}
+
+.omnie-meta{
+  margin-top:calc(var(--x) * 4);
+  font-size:.8125rem;
+  letter-spacing:.14em;
+  line-height:1.5;
+  text-transform:uppercase;
+}
+
+/* Dawni pracodawcy: rząd nazw oddzielony kreską — dane, ale w kolorze tekstu. */
+.omnie-proza .omnie-marki{
+  margin-top:calc(var(--x) * 3);
+  padding-top:calc(var(--x) * 3);
+  border-top:1px solid var(--rule);
+  font-size:1rem;
+  font-weight:600;
+  letter-spacing:-.005em;
+  line-height:1.5;
+  color:var(--fg);
+}
+
+/* --------------------------------------------------------------------------
+   Plansza typograficzna — jedno zdanie na pełny ekran
+   -------------------------------------------------------------------------- */
+
+.plansza{padding-block:0}   /* padding siedzi w .plansza-inner, żeby pole miało równo 100svh */
+
+.plansza-inner{
+  min-height:100svh;
+  padding-block:calc(var(--x) * 8);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+}
+
+@supports not (height:100svh){
+  .plansza-inner{min-height:100vh}
+}
+
+.plansza-line{
+  font-weight:600;
+  font-size:clamp(1.82rem,7.56vw,6.58rem);   /* 70% poprzedniej skali — zdanie ma oddech, nie ścianę */
+  line-height:.95;
+  letter-spacing:-.035em;
+  margin:0;
+  text-wrap:balance;
 }
 
 /* --------------------------------------------------------------------------
@@ -669,7 +796,6 @@ h1,h2,h3{
   list-style:none;
   display:grid;
   grid-template-columns:repeat(6, calc((var(--k) - var(--ov)) / 2)) var(--ov);
-  row-gap:calc(var(--x) * 2);
   justify-content:center;
 }
 
@@ -698,6 +824,12 @@ h1,h2,h3{
 .kola li:nth-child(4){grid-column:2 / span 2;grid-row:2}
 .kola li:nth-child(5){grid-column:4 / span 2;grid-row:2}
 
+/* Dolny rząd podjeżdża o 22% średnicy: odległość środków do górnych sąsiadów spada
+   do ok. 0,9 średnicy — każde koło zachodzi na hub i na sąsiada tak samo jak w górnym rzędzie.
+   Ujemny margines, bo row-gap nie przyjmuje wartości ujemnych. */
+.kola li:nth-child(4),
+.kola li:nth-child(5){margin-top:calc(var(--k) * -.22)}
+
 /* Pole nadrzędne: wypełnione na stałe, więc samo wskazuje środek układu. */
 .kola .is-hub{
   background:var(--accent);
@@ -718,10 +850,19 @@ h1,h2,h3{
   }
 }
 
-.kola-note{margin-top:calc(var(--x) * 7)}
+/* Zdanie pod schematem na jego osi — domyka układ kół. */
+.kola-note{
+  max-width:40ch;
+  margin:calc(var(--x) * 7) auto 0;
+  text-align:center;
+  text-wrap:balance;
+}
 
 /* --------------------------------------------------------------------------
-   Obszary — lista stoi, opisy jadą (wzór: lepont.pl)
+   Obszary — trzy tryby:
+   · bez skryptu: lista po lewej stoi, opisy jadą (desktop) albo zwykła lista (telefon)
+   · telefon: opisy są kartami, każda następna nachodzi na poprzednią
+   · desktop ze skryptem (is-pin): kadr stoi, przewijanie przełącza opisy po kolei
    -------------------------------------------------------------------------- */
 
 .obszary-tytul{
@@ -741,16 +882,39 @@ h1,h2,h3{
   padding-block:calc(var(--x) * 4);
 }
 
+.obszar-nr{
+  display:block;
+  margin-bottom:calc(var(--x) * 2);
+  font-size:.8125rem;
+  font-weight:600;
+  letter-spacing:.14em;
+  color:var(--fg-2);
+}
+
+/* Interlinia 1,12 i zapas pod spodem — przy 1,02 Familjen gubił dół „ę”, „ą” i „j”. */
 .obszar h3{
   font-size:clamp(1.5rem, 2.6vw, 2.25rem);
   letter-spacing:-.025em;
-  line-height:1.08;
+  line-height:1.12;
+  padding-bottom:.06em;
 }
 
 .obszar p{
   margin:calc(var(--x) * 2) 0 0;
   max-width:52ch;
   color:var(--fg-2);
+}
+
+/* Telefon: karty nachodzą na siebie. Równa minimalna wysokość sprawia, że następna
+   karta zakrywa poprzednią w całości — nie widać dwóch tekstów naraz. */
+@media (max-width:759px){
+  .obszar{
+    position:sticky;
+    top:calc(var(--x) * 7);   /* pod przyklejonym paskiem */
+    min-height:min(76svh, 560px);
+    background:var(--bg);
+    box-shadow:0 -14px 28px rgba(15,17,21,.06);   /* cień nad kartą: widać, że najeżdża */
+  }
 }
 
 @media (min-width:760px){
@@ -760,8 +924,7 @@ h1,h2,h3{
     margin-top:0;
   }
 
-  /* Kolumna ma wysokość ekranu i przykleja się do jego góry, a lista stoi w jej środku —
-     dzięki temu aktywna nazwa jest zawsze na wysokości czytanego opisu. */
+  /* Kolumna ma wysokość ekranu i przykleja się do jego góry, a lista stoi w jej środku. */
   .obszary-nav{
     display:flex;
     align-items:center;
@@ -771,6 +934,8 @@ h1,h2,h3{
     align-self:start;
     padding-right:calc(var(--x) * 4);
   }
+
+  .obszary-os{position:relative}
 
   .obszary-lista{
     margin:0;
@@ -782,9 +947,10 @@ h1,h2,h3{
 
   .obszary-lista a{
     display:inline-block;
+    padding-bottom:.06em;
     font-weight:600;
     font-size:clamp(1.6rem, 3.3vw, 3rem);
-    line-height:1.08;
+    line-height:1.12;
     text-wrap:balance;
     letter-spacing:-.035em;
     text-decoration:none;
@@ -792,14 +958,11 @@ h1,h2,h3{
     transition:color .45s var(--ease-out);
   }
 
-  /* Wygaszanie dopiero, gdy skrypt śledzi przewijanie. Szary #6B6F76 na bieli = 5,0:1,
-     więc nieaktywne nazwy zostają czytelne i przechodzą AA. */
+  /* Wygaszanie dopiero, gdy skrypt śledzi przewijanie. #575B62 na Mist = 5,6:1. */
   .obszary.is-live .obszary-lista a{color:var(--fg-2)}
   .obszary.is-live .obszary-lista a:hover,
   .obszary.is-live .obszary-lista a[aria-current="true"]{color:var(--fg)}
 
-  /* Zapas 15svh nad pierwszym i pod ostatnim opisem: środek skrajnych opisów
-     wypada na środku ekranu, tam gdzie stoi lista. */
   .obszary-opisy{
     border-left:1px solid var(--rule);
     padding-block:15svh;
@@ -811,7 +974,7 @@ h1,h2,h3{
     flex-direction:column;
     justify-content:center;
     padding:calc(var(--x) * 5) 0 calc(var(--x) * 5) calc(var(--x) * 6);
-    scroll-margin-top:15svh;   /* klik w nazwę stawia opis na środku ekranu */
+    scroll-margin-top:15svh;
   }
 
   .obszar:first-child{border-top:0}
@@ -825,122 +988,83 @@ h1,h2,h3{
   }
 }
 
-/* --------------------------------------------------------------------------
-   FAQ — lista rozwijana na <details>
-   -------------------------------------------------------------------------- */
+/* --- tryb przypięty (desktop, klasa z app.js, punkt 4) ------------------- */
 
-.faq-lista{
-  margin-top:calc(var(--x) * 6);
-  max-width:52rem;
-  border-bottom:1px solid var(--rule);
-}
+/* Tor przewijania: ekran + 62% ekranu na każdy opis. --n = liczba opisów. */
+.obszary.is-pin{padding-block:0}
+.obszary.is-pin .obszary-tor{height:calc(100svh + var(--n,5) * 62svh)}
 
-.faq-lista details{border-top:1px solid var(--rule)}
-
-.faq-lista summary{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:calc(var(--x) * 3);
-  padding-block:calc(var(--x) * 2.6);
-  font-size:var(--t-item);
-  font-weight:500;
-  line-height:1.25;
-  letter-spacing:-.015em;
-  list-style:none;
-  cursor:pointer;
-}
-
-.faq-lista summary::-webkit-details-marker{display:none}
-
-/* Strzałka z dwóch krawędzi kwadratu, kreska 1,6 px jak w przyciskach.
-   W dół = zamknięte, w górę = otwarte. */
-.faq-lista summary::after{
-  content:"";
-  flex:0 0 auto;
-  width:.5em;
-  height:.5em;
-  margin:.25em .2em 0 0;
-  border-right:1.6px solid currentColor;
-  border-bottom:1.6px solid currentColor;
-  transform:rotate(45deg);
-  transition:transform .35s var(--ease-out);
-}
-
-.faq-lista details[open] > summary::after{transform:translateY(.25em) rotate(-135deg)}
-
-.faq-lista summary:focus-visible{outline-offset:6px}
-
-.faq-lista details p{
-  margin:0;
-  padding-bottom:calc(var(--x) * 3);
-  max-width:60ch;
-  color:var(--fg-2);
-}
-
-/* --------------------------------------------------------------------------
-   O mnie — portret i historia
-   -------------------------------------------------------------------------- */
-
-.o-mnie-uklad{
-  display:grid;
-  gap:calc(var(--x) * 5);
-}
-
-/* Mobile: portret nad tekstem, najwyżej 240 px — twarz rozpoznawalna, tekst nie spada pod ekran. */
-.o-mnie-foto{
-  display:block;
-  order:-1;
-  width:100%;
-  max-width:240px;
-  aspect-ratio:4 / 5;
+.obszary.is-pin .obszary-kadr{
+  position:sticky;
+  top:0;
+  height:100svh;
   overflow:hidden;
-  background:var(--bis-mist);
+  display:flex;
+  flex-direction:column;
+  padding-block:calc(var(--x) * 11) calc(var(--x) * 6);
 }
 
-.o-mnie-foto img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  object-position:center 20%;
+.obszary.is-pin .obszary-kadr > .wrap{
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
 }
 
-@media (min-width:760px){
-  /* 3 : 2 — portret bierze ok. 40% szerokości, po prawej. */
-  .o-mnie-uklad{
-    grid-template-columns:minmax(0,3fr) minmax(0,2fr);
-    column-gap:calc(var(--x) * 8);
-    align-items:start;
-  }
-  .o-mnie-foto{order:0;max-width:none}
+.obszary.is-pin .obszary-uklad{flex:1;min-height:0;margin-top:calc(var(--x) * 3)}
+.obszary.is-pin .obszary-nav{position:static;height:auto}
+
+/* Oś postępu przy liście: szara szyna, akcent rośnie w dół. */
+.obszary.is-pin .obszary-os{padding-left:calc(var(--x) * 3.5)}
+
+.obszary.is-pin .obszary-os::before,
+.obszary-postep{
+  position:absolute;
+  left:0;
+  top:.3em;
+  bottom:.3em;
+  width:2px;
 }
 
-.o-mnie-tytul{
-  font-size:clamp(2rem, 4.4vw, 3.6rem);
-  line-height:1.04;
-  letter-spacing:-.03em;
+.obszary.is-pin .obszary-os::before{content:"";background:var(--rule)}
+.obszary-postep{display:none}
+
+.obszary.is-pin .obszary-postep{
+  display:block;
+  background:var(--accent);
+  transform:scaleY(var(--p,0));
+  transform-origin:50% 0;
 }
 
-.o-mnie-prose{margin-top:calc(var(--x) * 4);max-width:52ch}
-
-.o-mnie-prose p{
-  margin:0 0 1em;
-  font-size:clamp(1.0625rem, 1.35vw, 1.25rem);
-  line-height:1.5;
+.obszary.is-pin .obszary-opisy{
+  position:relative;
+  padding-block:0;
 }
 
-.o-mnie-prose p:last-child{margin-bottom:0}
-
-/* Pasek doświadczenia: te same proporcje co .comp-tags, bez ramek. */
-.o-mnie-firmy{
-  margin:calc(var(--x) * 4) 0 0;
-  font-size:.875rem;
-  letter-spacing:.02em;
-  line-height:1.5;
-  color:var(--fg-2);
+/* Wszystkie opisy w jednym miejscu. Poprzedni odjeżdża w górę i gaśnie,
+   następny wchodzi od dołu z krótkim opóźnieniem — nigdy nie stoją razem. */
+.obszary.is-pin .obszar{
+  position:absolute;
+  inset:0;
+  min-height:0;
+  border-top:0;
+  opacity:0;
+  transform:translate3d(0,7vh,0);
+  transition:opacity .45s ease,transform .9s var(--ease-out);
+  pointer-events:none;
 }
 
-.o-mnie .kontakt-link{margin-top:calc(var(--x) * 4)}
+.obszary.is-pin .obszar.is-past{transform:translate3d(0,-7vh,0)}
+
+.obszary.is-pin .obszar.is-active{
+  opacity:1;
+  transform:none;
+  pointer-events:auto;
+  transition-delay:.18s;
+}
+
+.obszary.is-pin .obszar h3{font-size:clamp(1.9rem, 3.2vw, 3rem)}
+.obszary.is-pin .obszar p{font-size:1.125rem;line-height:1.5}
 
 /* --------------------------------------------------------------------------
    Współpraca — typografia jako grafika (wzór: basicagency.com)
@@ -948,14 +1072,7 @@ h1,h2,h3{
 
 /* Więcej powietrza nad i pod sekcją — dłuższa droga dla przejścia koloru w obie strony.
    Kompensuje start przejścia dopiero po planszy w czystej Ultra. */
-.wspolpraca{
-  padding-block:calc(var(--x) * 26);
-  /* Nagłówek ma nowrap i skalę od szerokości pola. Gdy krój jeszcze się nie wczytał
-     (zastępczy jest szerszy), wiersz wystaje i strona przewija się w bok.
-     hidden jako rezerwa dla Safari < 16, clip nie tworzy kontenera przewijania. */
-  overflow-x:hidden;
-  overflow-x:clip;
-}
+.wspolpraca{padding-block:calc(var(--x) * 26)}
 
 @media (max-width:760px){
   .wspolpraca{padding-block:calc(var(--x) * 18)}
@@ -1022,16 +1139,6 @@ h1,h2,h3{
   text-transform:uppercase;
 }
 
-/* Czas i forma kroku — drobny stopień, kolor drugorzędny (Ultra Light na grafit = 5,2:1). */
-.step-meta{
-  display:block;
-  margin-top:calc(var(--x) * 1.2);
-  font-size:.9375rem;
-  line-height:1.4;
-  letter-spacing:.01em;
-  color:var(--fg-2);
-}
-
 /* Opis krojem nagłówkowym i w dużym stopniu — kolumna ma się czytać jak blok graficzny,
    nie jak przypis. */
 .steps p{
@@ -1044,30 +1151,36 @@ h1,h2,h3{
   text-wrap:pretty;
 }
 
+/* Ramy kroku: czas i forma rozliczenia. Skala podpisu, żeby nie konkurowała z opisem.
+   Selektor z .steps, bo reguła .steps p ustawia opisom inny stopień i odstęp. */
+.steps p.steps-meta{
+  margin:calc(var(--x) * 1.4) 0 0;
+  font-size:.8125rem;
+  font-weight:500;
+  letter-spacing:.14em;
+  line-height:1.4;
+  text-transform:uppercase;
+  color:var(--fg-2);
+}
+
 /* --------------------------------------------------------------------------
    Kontakt — pole akcentu zamyka stronę
    -------------------------------------------------------------------------- */
 
-/* Spiętrzony nagłówek: rzędy w proporcji 1 : 2 : 4. Skala liczona od szerokości pola,
-   nie od ekranu, więc na szerokich monitorach ostatni rząd nie wychodzi poza siatkę.
-   --kontakt-k to wysokość pełnego rzędu; dzielnik 4,42 = zmierzona szerokość „KONTAKT.” w em (Familjen 700).
-   Zmiana kroju, wagi lub tekstu wymaga ponownego pomiaru. */
+/* Jedno słowo na całą szerokość pola. Dzielnik 4,42 = zmierzona szerokość „KONTAKT.”
+   w em (Familjen 700, -0,045em, wersaliki). Zmiana tekstu, wagi lub kroju = nowy pomiar. */
 .kontakt-tytul{
-  --kontakt-k:calc((min(100vw, var(--maxw)) - 2 * var(--gutter)) / 4.42);
+  font-size:calc((min(100vw, var(--maxw)) - 2 * var(--gutter)) / 4.42);
   font-weight:700;
   letter-spacing:-.045em;
   line-height:.86;
+  text-transform:uppercase;
   white-space:nowrap;
   text-wrap:nowrap;
 }
 
-.kontakt-rzad{display:inline-block}
-.kontakt-rzad--1{font-size:calc(var(--kontakt-k) * .25)}
-.kontakt-rzad--2{font-size:calc(var(--kontakt-k) * .5)}
-.kontakt-rzad--3{font-size:var(--kontakt-k)}
-
 .kontakt-lead{
-  margin:calc(var(--x) * 7) 0 0;
+  margin:calc(var(--x) * 6) 0 0;
   font-weight:500;
   font-size:clamp(1.5rem, 3.4vw, 2.75rem);
   line-height:1.12;
@@ -1075,43 +1188,17 @@ h1,h2,h3{
   text-wrap:balance;
 }
 
-/* Podpis z twarzą. Kadr kwadratowy 96 px z pionowego portretu: cover wypełnia kwadrat,
-   skala przybliża głowę. Kwadrat, nie koło — koło jest zarezerwowane dla akcji. */
-.kontakt-podpis{
+/* Mail i LinkedIn w jednym rzędzie — dwa równorzędne kanały. Na wąskim ekranie łamią się. */
+.kontakt-kanaly{
   display:flex;
+  flex-wrap:wrap;
   align-items:center;
-  gap:calc(var(--x) * 2);
+  gap:calc(var(--x) * 2.5) calc(var(--x) * 4);
   margin-top:calc(var(--x) * 4);
-}
-
-.kontakt-foto{
-  display:block;
-  flex:0 0 96px;
-  width:96px;
-  height:96px;
-  overflow:hidden;
-  background:var(--bis-mist);
-}
-
-.kontakt-foto img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  object-position:50% 0;
-  transform:scale(1.9);
-  transform-origin:50% 16%;
-}
-
-.kontakt-podpis p{
-  margin:0;
-  font-size:.9375rem;
-  line-height:1.4;
-  color:var(--fg-2);
 }
 
 .mailto{
   display:inline-block;
-  margin-top:calc(var(--x) * 4);
   font-weight:600;
   font-size:clamp(1.5rem,5.2vw,3.6rem);
   letter-spacing:-.03em;
@@ -1126,102 +1213,250 @@ h1,h2,h3{
 
 .mailto:focus-visible{background-size:100% 2px}
 
-/* LinkedIn pod mailem: rozmiar leadu, strzałka w białym kole — ta sama rodzina co przycisk w hero. */
-/* tekst tylko dla czytników ekranu */
-.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-
-.kontakt-link{
-  display:flex;
-  width:fit-content;
+/* LinkedIn: obrys w kształcie pigułki, ta sama kategoria co „Kontakt” w pasku.
+   Kolory ze zmiennych sceny, więc przycisk nadąża za przejściem tła. */
+.kontakt-in{
+  display:inline-flex;
   align-items:center;
-  gap:calc(var(--x) * 1.4);
-  margin-top:calc(var(--x) * 3);
-  font-weight:500;
-  font-size:var(--t-lead);
-  letter-spacing:-.02em;
+  gap:calc(var(--x) * 1.2);
+  padding:calc(var(--x) * 1.3) calc(var(--x) * 2.6) calc(var(--x) * 1.3) calc(var(--x) * 2);
+  border:1.5px solid currentColor;
+  border-radius:999px;
+  font-weight:600;
+  font-size:1.0625rem;
+  line-height:1;
   text-decoration:none;
-  color:inherit;
+  transition:background-color .3s var(--ease-out),color .3s var(--ease-out);
 }
 
-.kontakt-link svg{
-  flex-shrink:0;
-  width:calc(var(--x) * 4);
-  height:calc(var(--x) * 4);
-  padding:calc(var(--x) * .9);
-  border-radius:50%;
-  background:#fff;
-  color:var(--bis-ink);
-  transition:transform .35s var(--ease-out),background .3s var(--ease-out);
-}
+.kontakt-in svg{width:20px;height:20px;flex:none}
 
-.kontakt-link:focus-visible svg{transform:translate(12%,-12%)}
-
-@media (hover:hover){
-  .kontakt-link:hover svg{transform:translate(12%,-12%)}
-}
+.kontakt-in:hover,
+.kontakt-in:focus-visible{background:var(--fg);color:var(--bg)}
 
 @media (hover:hover){
   .mailto:hover{background-size:100% 2px}
 }
 
-/* Sekcja kontaktu niesie sygnaturę, więc musi być układem odniesienia i przycinać.
-   Co najmniej wysokość ekranu — na mobile była niższa i przejście koloru przed nią robiło się strome.
-   Treść u góry, sygnatura dociśnięta do dołu, niezależnie od wysokości pola. */
+/* tekst tylko dla czytników ekranu */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* Co najmniej wysokość ekranu. Treść u góry, znak w tle dociśnięty do dołu. */
 .kontakt{
   position:relative;
   overflow:hidden;
-  padding-bottom:0;
   min-height:100svh;
   display:flex;
   flex-direction:column;
+  padding-bottom:calc(var(--x) * 4);
 }
 
-.kontakt > .wrap{flex:1 0 auto}
+.kontakt > .wrap{
+  flex:1 0 auto;
+  display:flex;
+  flex-direction:column;
+}
 
 @supports not (height:100svh){
   .kontakt{min-height:100vh}
 }
 
-/* Telefon: pełna wysokość ekranu zostawiała pod linkami pusty pas.
-   Pole ma wysokość treści, a sygnaturę od linków oddziela stały odstęp. */
-@media (max-width:760px){
-  .kontakt{min-height:auto}
-  .kontakt > .wrap{padding-bottom:calc(var(--x) * 2)}
+/* Znak w całości, na szerokość siatki. Ramka przycina — znak wysuwa się spod jej dolnej krawędzi. */
+.sygnatura-rama{
+  margin-top:auto;
+  padding-top:calc(var(--x) * 10);
+  overflow:hidden;
 }
 
 .sygnatura{
   display:block;
-  width:128%;
-  max-width:none;
-  margin:calc(var(--x) * 6) 0 0 -14%;
-  opacity:.16;
-  transform:translate3d(0,calc(24% + var(--px,0px)),0);
+  width:100%;
+  height:auto;
+  opacity:.2;
   pointer-events:none;
 }
 
-@media (max-width:760px){
-  .sygnatura{width:150%;margin-left:-25%;transform:translate3d(0,calc(28% + var(--px,0px)),0)}
+.js .sygnatura{
+  transform:translate3d(0,110%,0);
+  transition:transform 1.6s var(--ease-out);
 }
 
+.sygnatura-rama.is-in .sygnatura{transform:none}
+
 /* --------------------------------------------------------------------------
-   Stopka — dane firmy
+   Stopka — nawigacja, kanały, dane firmy
    -------------------------------------------------------------------------- */
 
 .stopka{
   background:var(--bis-ink);
-  color:rgba(255,255,255,.68);   /* 11:1 na grafit — drobny tekst przechodzi AA z zapasem */
-  font-size:.8125rem;
-  padding-block:calc(var(--x) * 3);
-}
-
-.stopka-inner{
-  display:flex;
-  flex-wrap:wrap;
-  gap:calc(var(--x) * 1) calc(var(--x) * 3);
+  color:#fff;
+  padding-block:calc(var(--x) * 10) calc(var(--x) * 4);
+  font-size:.9375rem;
 }
 
 .stopka a{text-decoration:none}
-.stopka a:hover{text-decoration:underline}
+
+.stopka-gora{
+  display:grid;
+  gap:calc(var(--x) * 7);
+}
+
+@media (min-width:900px){
+  .stopka-gora{
+    grid-template-columns:minmax(0,5fr) minmax(0,3.5fr) minmax(0,3.5fr);
+    gap:calc(var(--x) * 6);
+  }
+}
+
+.stopka-logo{display:inline-block}
+.stopka-logo img{width:200px;height:auto}   /* minimum z księgi: 160 px */
+
+/* rgba(255,255,255,.66) na grafit = ok. 9:1 */
+.stopka-motto{
+  margin:calc(var(--x) * 3) 0 0;
+  max-width:32ch;
+  color:rgba(255,255,255,.66);
+  font-size:1.0625rem;
+  line-height:1.45;
+}
+
+.stopka-etykieta{
+  margin:0 0 calc(var(--x) * 2.5);
+  font-size:.8125rem;
+  font-weight:500;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.6);
+}
+
+.stopka-nav ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:calc(var(--x) * 1.6);
+}
+
+.stopka-nav a,
+.stopka-gora-link{
+  display:inline-flex;
+  align-items:center;
+  gap:calc(var(--x) * 1.8);
+  font-weight:500;
+  letter-spacing:-.01em;
+}
+
+.stopka-nav a{font-size:clamp(1.125rem, 1.6vw, 1.375rem)}
+
+/* Okrągła strzałka — koło to reguła strony dla akcji. Po najechaniu: Ultra z bielą (6,7:1). */
+.krazek{
+  flex:none;
+  display:inline-grid;
+  place-items:center;
+  width:calc(var(--x) * 5);
+  height:calc(var(--x) * 5);
+  border-radius:50%;
+  background:rgba(255,255,255,.09);
+  color:#fff;
+  transition:background-color .3s var(--ease-out),transform .4s var(--ease-out);
+}
+
+.krazek svg{width:18px;height:18px}
+
+.stopka a:hover .krazek,
+.stopka a:focus-visible .krazek{background:var(--bis-accent)}
+.stopka-nav a:hover .krazek,
+.stopka-nav a:focus-visible .krazek{transform:translateX(4px)}
+.stopka-gora-link:hover .krazek,
+.stopka-gora-link:focus-visible .krazek{transform:translateY(-4px)}
+
+.stopka-mail{
+  font-size:clamp(1.125rem, 1.6vw, 1.375rem);
+  font-weight:500;
+  letter-spacing:-.01em;
+  background:linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition:background-size .45s var(--ease-out);
+  padding-bottom:.1em;
+  word-break:break-word;
+}
+
+@media (min-width:900px){
+  .stopka-mail{white-space:nowrap;word-break:normal}
+}
+
+.stopka-mail:hover,
+.stopka-mail:focus-visible{background-size:100% 1px}
+
+.stopka-miejsce{
+  margin:calc(var(--x) * 2) 0 0;
+  color:rgba(255,255,255,.66);
+}
+
+.stopka-dol{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:calc(var(--x) * 2.5) calc(var(--x) * 4);
+  margin-top:calc(var(--x) * 10);
+  padding-top:calc(var(--x) * 3.5);
+  border-top:1px solid rgba(255,255,255,.16);
+}
+
+.stopka-social{display:flex;gap:calc(var(--x) * 1.2)}
+
+.stopka-ikona{
+  display:inline-grid;
+  place-items:center;
+  width:calc(var(--x) * 5.5);
+  height:calc(var(--x) * 5.5);
+  border:1px solid rgba(255,255,255,.3);
+  border-radius:50%;
+  transition:background-color .3s var(--ease-out),border-color .3s var(--ease-out);
+}
+
+.stopka-ikona svg{width:19px;height:19px}
+
+.stopka-ikona:hover,
+.stopka-ikona:focus-visible{background:var(--bis-accent);border-color:var(--bis-accent)}
+
+.stopka-prawne{
+  margin:0;
+  font-size:.8125rem;
+  color:rgba(255,255,255,.6);
+}
+
+.stopka-gora-link{font-size:.9375rem}
+
+@media (max-width:760px){
+  .stopka-dol{flex-direction:column;align-items:flex-start}
+}
+
+/* --------------------------------------------------------------------------
+   Kursor nad elementami, które reagują: kropka Ultra z białym obrysem
+   -------------------------------------------------------------------------- */
+
+/* Kropka ze znaku jako kursor — ten sam motyw co koła i forma w hero.
+   Biały obrys 2,5 px trzyma ją widoczną także na polach Ultra i na graficie.
+   SVG w data URI, bez skryptu: przeglądarka rysuje kursor sama, bez opóźnienia.
+   Punkt aktywny w środku koła (12 12). Druga wartość to zapas, gdy SVG nie wejdzie:
+   pointer dla odnośników, zwykła strzałka dla elementów, które tylko reagują ruchem.
+   Tylko mysz i gładzik — na dotyku kursora nie ma. */
+@media (hover:hover) and (pointer:fine){
+  :root{
+    --kursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='%232B3AFF' stroke='%23fff' stroke-width='2.5'/%3E%3C/svg%3E") 12 12;
+  }
+
+  a,
+  button,
+  summary{cursor:var(--kursor), pointer}
+
+  .hero-form,
+  .kola li,
+  .kwal-lista li,
+  .omnie-scena,
+  .comp-tags li{cursor:var(--kursor), default}
+}
 
 /* --------------------------------------------------------------------------
    Ruch
@@ -1231,31 +1466,27 @@ h1,h2,h3{
    Krzywa startuje szybko i długo wytraca — stąd wrażenie ciężaru, a nie skoku. */
 :root{--ease-out:cubic-bezier(.16,1,.3,1)}
 
-/* Ukrywanie do animacji tylko z klasą .js na <html> (skrypt w <head>).
-   Bez JavaScriptu albo gdy app.js się nie wczyta, treść stoi widoczna. */
-.js [data-reveal]{
+[data-reveal]{
   opacity:0;
   transform:translateY(18px);
   transition:opacity 1s var(--ease-out),transform 1s var(--ease-out);
 }
 
-.js [data-reveal].is-in{opacity:1;transform:none}
+[data-reveal].is-in{opacity:1;transform:none}
 
 /* Nagłówki wjeżdżają linia po linii spod krawędzi maski.
-   Maska ma zapas na dolne wydłużenia liter, oddany ujemnym marginesem. */
+   Zapas góra/dół oddany ujemnym marginesem. Dół 0,3em: Familjen ma głębokie
+   wydłużenia dolne — przy 0,14em maska ucinała „g”, „p”, „j” i ogonki „ę”, „ą”. */
 .mask{
   display:block;
   overflow:hidden;
-  padding-bottom:.14em;
-  margin-bottom:-.14em;
+  padding:.12em 0 .3em;
+  margin:-.12em 0 -.3em;
 }
 
 .mask > i{
   display:block;
   font-style:normal;
-}
-
-.js .mask > i{
   transform:translateY(115%);
   transition:transform 1.15s var(--ease-out);
   transition-delay:var(--d,0ms);
@@ -1263,17 +1494,15 @@ h1,h2,h3{
 
 [data-mask].is-in .mask > i{transform:none}
 
-/* Koła wchodzą kaskadą od środka układu na zewnątrz — kolejność liczy JS. */
-.js [data-kola] li{
-  opacity:0;
-  transform:scale(.86);
-}
-
+/* Koła startują rozsunięte (--tx/--ty liczy JS: wektor od huba) i zjeżdżają się
+   w jeden układ — schemat pokazuje to, co mówi zdanie pod nim. */
 [data-kola] li{
+  opacity:0;
+  transform:translate3d(var(--tx,0px),var(--ty,0px),0) scale(.88);
   /* opóźnienie kaskady dotyczy tylko wejścia — kolor po najechaniu reaguje od razu */
   transition:
     opacity .9s var(--ease-out) var(--d,0ms),
-    transform .9s var(--ease-out) var(--d,0ms),
+    transform 1.5s var(--ease-out) var(--d,0ms),
     background-color .35s ease,
     border-color .35s ease,
     color .35s ease;
@@ -1283,27 +1512,32 @@ h1,h2,h3{
 
 /* Paralaksa: JS podaje przesunięcie w zmiennej, CSS decyduje, co z nim zrobić. */
 [data-px]{will-change:transform}
+.plansza-line[data-px]{transform:translate3d(0,var(--px,0px),0)}
 
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{
     animation-duration:.01ms !important;   /* wyłączamy ruch, nie znaczenie */
     transition-duration:.01ms !important;
   }
-  .js [data-reveal]{opacity:1;transform:none}
-  .js .mask > i{transform:none}
-  .js [data-kola] li{opacity:1;transform:none}
+  [data-reveal]{opacity:1;transform:none}
+  .mask > i{transform:none}
+  [data-kola] li{opacity:1;transform:none}
+  .plansza-line[data-px],
   .sygnatura,
-  .czym-linia{transform:none}
-  .js .czym-strzalka path{animation:none;stroke-dashoffset:0}   /* strzałka narysowana od razu */
-  .faq-lista summary::after{transition:none}
-  .sygnatura{margin-top:calc(var(--x) * 4)}
+  .omnie-tlo,
+  .omnie-kolo-px,
+  .omnie-kolo{transform:none}
+  .omnie-kolo{opacity:1}
+  .omnie-portret{clip-path:none}
+  .kwal-lista.is-armed li{opacity:1;transform:none}
+  .kwal-lista.is-armed li::before{transform:none}
+  .obszar{position:static}                  /* karty na telefonie bez nachodzenia */
   .sticky{transition:none}
   html{scroll-behavior:auto}
-  .blob,
-  .hero-form svg{animation:none;transform:none;opacity:1}   /* kształt zostaje w klatce spoczynkowej */
-  /* kreska znaku przewijania jest narysowana od razu, bez rysowania się */
-  .cue-ring,.cue-tail,.cue-head{animation:none;stroke-dashoffset:0}
-  .scroll-cue-mark{animation:none;transform:none}
+  .blob{animation:none;opacity:1}           /* kształt zostaje w klatce spoczynkowej */
+  /* kreska znaku przewijania jest narysowana od razu i stoi */
+  .cue-line,.cue-head{animation:none;stroke-dashoffset:0}
+  .scroll-cue svg{animation:none}
   .btn-connect:hover svg{transform:none}
 }
 
