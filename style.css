@@ -181,7 +181,7 @@ a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px}
 
 h1,h2,h3{
   font-weight:600;
-  letter-spacing:-.025em;
+  letter-spacing:-.015em;   /* było -.025: „wy”, „ko” stykały się przy 600 */
   line-height:1.02;
   margin:0;
   text-wrap:balance;
@@ -204,7 +204,7 @@ h1,h2,h3{
   font-weight:500;
   font-size:clamp(1.75rem, 4.6vw, 3.75rem);
   line-height:1.14;
-  letter-spacing:-.03em;
+  letter-spacing:-.015em;   /* było -.03: „ty”, „wy” stykały się w zdaniach tezy */
   max-width:30ch;
   text-wrap:pretty;
 }
@@ -395,9 +395,13 @@ h1,h2,h3{
    kurtyna najpierw przewija je do końca (app.js, punkt 7), więc przycisk nie przepada. */
 @media (max-width:760px){
   .hero-inner{gap:calc(var(--x) * 1.5)}
+  /* Tekst w górnej części ekranu, puste pole Ultra pod nim. Kurtyna najeżdża od dołu,
+     więc najpierw zasłania pustkę, a przycisk zostaje widoczny przez ok. 40% ekranu przewijania.
+     Przy tekście dociśniętym do dołu zasłona przykrywała przycisk już po kilku pikselach. */
   .hero-body{
     gap:calc(var(--x) * 3);
-    justify-content:flex-end;          /* bez formy tekst stoi u dołu pierwszego ekranu, pod nim nic nie wisi */
+    justify-content:flex-start;
+    padding-top:clamp(calc(var(--x) * 3), 7svh, calc(var(--x) * 9));
   }
   .hero-form{display:none}             /* telefon bez formy — app.js (punkt 8) sam wstrzymuje wtedy animację */
 }
@@ -529,7 +533,7 @@ h1,h2,h3{
   font-size:clamp(1.5rem, 2.2vw, 2rem);
   font-weight:700;
   line-height:1.15;
-  letter-spacing:-.022em;
+  letter-spacing:-.012em;
 }
 
 .kwal-lista{
@@ -548,7 +552,7 @@ h1,h2,h3{
   padding:calc(var(--x) * 3.2) calc(var(--x) * 2);
   font-size:clamp(1.35rem, 2.55vw, 2.3rem);
   line-height:1.2;
-  letter-spacing:-.022em;
+  letter-spacing:-.01em;    /* było -.022: pogrubienia 700 zlewały „ty”, „ry” */
   color:var(--fg-2);
   text-wrap:pretty;
   /* Zaznaczenie jako tło rosnące od dołu — gradient, bo ::before niesie już kreskę. */
@@ -654,7 +658,6 @@ h1,h2,h3{
   top:8%;
   width:96%;
   aspect-ratio:1;
-  transform:translate3d(0,var(--px,0px),0);
 }
 
 .omnie-kolo{
@@ -795,7 +798,7 @@ h1,h2,h3{
   font-weight:600;
   font-size:clamp(1.82rem,7.56vw,6.58rem);   /* 70% poprzedniej skali — zdanie ma oddech, nie ścianę */
   line-height:.95;
-  letter-spacing:-.035em;
+  letter-spacing:-.02em;
   margin:0;
   text-wrap:balance;
 }
@@ -891,22 +894,13 @@ h1,h2,h3{
    · desktop ze skryptem (is-pin): kadr stoi, przewijanie przełącza opisy po kolei
    -------------------------------------------------------------------------- */
 
+/* Tytuł w skali nagłówków sekcji (.h-sec). Wcześniej miał rozmiar leadu (ok. 23 px)
+   i stał pod listą jak podpis, choć to nagłówek całej sekcji. */
 .obszary-tytul{
-  font-size:var(--t-lead);
-  font-weight:500;
-  letter-spacing:-.01em;
-  line-height:1.3;
-}
-
-/* Telefon: bez listy po lewej tytuł jest jedynym nagłówkiem sekcji — skala jak .h-sec. */
-@media (max-width:759px){
-  .obszary-tytul{
-    font-size:var(--t-h2);
-    font-weight:600;
-    letter-spacing:-.025em;
-    line-height:1.02;
-    padding-bottom:.06em;
-  }
+  font-size:var(--t-h2);
+  font-weight:600;
+  line-height:1.02;
+  padding-bottom:.06em;
 }
 
 .obszary-uklad{margin-top:calc(var(--x) * 4)}
@@ -922,7 +916,7 @@ h1,h2,h3{
 /* Interlinia 1,12 i zapas pod spodem — przy 1,02 Familjen gubił dół „ę”, „ą” i „j”. */
 .obszar h3{
   font-size:clamp(1.5rem, 2.6vw, 2.25rem);
-  letter-spacing:-.025em;
+  letter-spacing:-.015em;
   line-height:1.12;
   padding-bottom:.06em;
 }
@@ -968,7 +962,7 @@ h1,h2,h3{
     font-size:clamp(1.6rem, 3.3vw, 3rem);
     line-height:1.12;
     text-wrap:balance;
-    letter-spacing:-.035em;
+    letter-spacing:-.015em;   /* było -.035: „nw” w „konwersja” i „wt” w „Growth” zlewały się */
     text-decoration:none;
     color:var(--fg);
     transition:color .45s var(--ease-out);
@@ -1004,10 +998,10 @@ h1,h2,h3{
 
 /* --- tryb przypięty (desktop, klasa z app.js, punkt 4) ------------------- */
 
-/* Tor przewijania: ekran + 34% ekranu na każdy opis (ok. 3 ruchy kółkiem myszy).
-   Wcześniej 62% — opis zmieniał się dopiero po 5–6 ruchach. --n = liczba opisów. */
+/* Tor przewijania: ekran + 42% ekranu na każdy opis (ok. 4 ruchy kółkiem myszy).
+   62% było za długo (5–6 ruchów), 34% za krótko — opisy migały, zanim dało się je przeczytać. */
 .obszary.is-pin{padding-block:0}
-.obszary.is-pin .obszary-tor{height:calc(100svh + var(--n,5) * 34svh)}
+.obszary.is-pin .obszary-tor{height:calc(100svh + var(--n,5) * 42svh)}
 
 .obszary.is-pin .obszary-kadr{
   position:sticky;
@@ -1027,6 +1021,9 @@ h1,h2,h3{
 }
 
 .obszary.is-pin .obszary-uklad{flex:1;min-height:0;margin-top:calc(var(--x) * 3)}
+
+/* Kadr ma równo wysokość ekranu: na niskim laptopie tytuł nie może zabrać miejsca opisom. */
+.obszary.is-pin .obszary-tytul{font-size:min(var(--t-h2), 8.5svh)}
 .obszary.is-pin .obszary-nav{position:static;height:auto}
 
 .obszary.is-pin .obszary-opisy{
@@ -1162,7 +1159,11 @@ h1,h2,h3{
 
 /* Jedno słowo na całą szerokość pola. Dzielnik 4,42 = zmierzona szerokość „KONTAKT.”
    w em (Familjen 700, -0,045em, wersaliki). Zmiana tekstu, wagi lub kroju = nowy pomiar. */
+/* Ujemny lewy margines = lewy odstęp litery „K” w Familjen 700 (0,063em). Przy 238 px
+   to 15 px, więc tytuł stał wyraźnie na prawo od tekstu pod nim. Teraz krawędź „K”
+   stoi na tej samej linii co lead, adres e-mail i znak. */
 .kontakt-tytul{
+  margin-left:-.063em;
   font-size:calc((min(100vw, var(--maxw)) - 2 * var(--gutter)) / 4.42);
   font-weight:700;
   letter-spacing:-.045em;
@@ -1172,13 +1173,17 @@ h1,h2,h3{
   text-wrap:nowrap;
 }
 
+/* Hierarchia: tytuł (grafika) → adres e-mail (działanie) → instrukcja (tekst).
+   Wcześniej instrukcja miała 44 px przy 58 px adresu i trzy poziomy walczyły ze sobą;
+   na telefonie instrukcja i adres miały po 24 px. Teraz instrukcja ma skalę leadu. */
 .kontakt-lead{
-  margin:calc(var(--x) * 6) 0 0;
+  margin:calc(var(--x) * 5) 0 0;
+  max-width:40ch;
   font-weight:500;
-  font-size:clamp(1.5rem, 3.4vw, 2.75rem);
-  line-height:1.12;
-  letter-spacing:-.03em;
-  text-wrap:balance;
+  font-size:var(--t-lead);
+  line-height:1.4;
+  letter-spacing:-.01em;
+  text-wrap:pretty;
 }
 
 /* Mail i LinkedIn w jednym rzędzie — dwa równorzędne kanały. Na wąskim ekranie łamią się. */
@@ -1187,14 +1192,14 @@ h1,h2,h3{
   flex-wrap:wrap;
   align-items:center;
   gap:calc(var(--x) * 2.5) calc(var(--x) * 4);
-  margin-top:calc(var(--x) * 4);
+  margin-top:calc(var(--x) * 5);
 }
 
 .mailto{
   display:inline-block;
   font-weight:600;
-  font-size:clamp(1.5rem,5.2vw,3.6rem);
-  letter-spacing:-.03em;
+  font-size:clamp(1.75rem, 7.8vw, 3.6rem);   /* telefon: adres na całą szerokość siatki, nie 2/3 */
+  letter-spacing:-.02em;
   line-height:1.05;
   text-decoration:none;
   word-break:break-word;
@@ -1216,7 +1221,7 @@ h1,h2,h3{
   border:1.5px solid currentColor;
   border-radius:999px;
   font-weight:600;
-  font-size:1.0625rem;
+  font-size:clamp(1.0625rem, 1.3vw, 1.25rem);   /* przy 58 px adresu 17 px wyglądało na przypis */
   line-height:1;
   text-decoration:none;
   transition:background-color .3s var(--ease-out),color .3s var(--ease-out);
@@ -1253,6 +1258,10 @@ h1,h2,h3{
 @supports not (height:100svh){
   .kontakt{min-height:100vh}
 }
+
+/* Wolne miejsce dzielone po połowie: nad tytułem i nad znakiem. Treść stoi w środku pola,
+   zamiast wisieć u góry nad pustym pasem (na telefonie ok. 260 px pustki). */
+.kontakt-tytul{margin-top:auto}
 
 /* Znak w całości, na szerokość siatki. Ramka przycina — znak wysuwa się spod jej dolnej krawędzi. */
 .sygnatura-rama{
@@ -1487,9 +1496,14 @@ h1,h2,h3{
 
 [data-kola].is-in li{opacity:1;transform:none}
 
-/* Paralaksa: JS podaje przesunięcie w zmiennej, CSS decyduje, co z nim zrobić. */
+/* Nic nie wystaje poza szerokość ekranu. Koła w „Pięciu obszarach” startują rozsunięte
+   na boki i przed wejściem wychodziły 23 px za prawą krawędź telefonu — strona robiła się
+   szersza od ekranu i przy przewijaniu kołysała się na boki. clip, nie hidden:
+   nie tworzy kontenera przewijania, więc elementy przyklejone (sticky) działają dalej. */
+main{overflow-x:clip}
+
+/* Paralaksa: przesunięcie wpisuje app.js wprost w styl elementu (punkt 6). */
 [data-px]{will-change:transform}
-.plansza-line[data-px]{transform:translate3d(0,var(--px,0px),0)}
 
 /* Głębia między sekcjami (desktop, app.js punkt 6a). Przesuwa się tylko .wrap,
    tło sekcji stoi. Każde pole leży warstwę wyżej niż poprzednie (kolejność z kodu),
@@ -1498,12 +1512,10 @@ h1,h2,h3{
 .glebia .band,
 .glebia .scena{position:relative;z-index:1}
 
-/* Skala tylko na telefonie (na desktopie zostaje 1). Oś u dołu treści: treść maleje
-   do własnej dolnej krawędzi, więc nigdy nie wychodzi na następne pole. */
+/* Przesunięcie, skalę (tylko telefon) i krycie wpisuje app.js wprost w styl .wrap.
+   Oś u dołu treści: treść maleje do własnej dolnej krawędzi, więc nie wychodzi na następne pole. */
 .warstwa{
-  transform:translate3d(0,var(--glebia,0px),0) scale(var(--glebia-skala,1));
   transform-origin:50% 100%;
-  opacity:var(--glebia-krycie,1);
   will-change:transform,opacity;
 }
 
@@ -1597,7 +1609,6 @@ html.intro .blob{animation:none;opacity:0}
   [data-reveal]{opacity:1;transform:none}
   .mask > i{transform:none}
   [data-kola] li{opacity:1;transform:none}
-  .plansza-line[data-px],
   .sygnatura,
   .omnie-kolo-px,
   .omnie-kolo{transform:none}
@@ -1605,7 +1616,6 @@ html.intro .blob{animation:none;opacity:0}
   .omnie-portret{clip-path:none}
   .kwal-lista.is-armed li{opacity:1;transform:none}
   .kwal-lista.is-armed li::before{transform:none}
-  .warstwa{transform:none;opacity:1}
   .sticky{transition:none}
   html{scroll-behavior:auto}
   .blob{animation:none;opacity:1}           /* kształt zostaje w klatce spoczynkowej */

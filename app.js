@@ -12,6 +12,55 @@
   document.documentElement.classList.add('js');
 
   var clamp01 = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+  var maRaf = 'requestAnimationFrame' in window;
+
+  /* Wspólna klatka przewijania. Moduł zgłasza dwie funkcje: czytaj (tylko pomiary)
+     i pisz (tylko zapisy). W każdej klatce najpierw idą wszystkie pomiary, potem wszystkie
+     zapisy — jedno przeliczenie stylu i układu zamiast kilku. Wcześniej każdy moduł miał
+     własne requestAnimationFrame i mierzył stronę tuż po zapisach poprzedniego, więc
+     przeglądarka liczyła wszystko 2–3 razy na klatkę i na telefonie ruch gubił klatki.
+     pisz zwraca true, gdy moduł chce kolejnej klatki (wygładzanie koloru, odsłanianie słów). */
+  var zadania = [], ramka = 0, tRamki = 0;
+
+  var klatkaWspolna = function (teraz) {
+    ramka = 0;
+    var dt = tRamki ? Math.min(64, teraz - tRamki) : 16;
+    tRamki = teraz;
+    var odczyty = zadania.map(function (z) { return z.czytaj ? z.czytaj() : null; });
+    var dalej = false;
+    zadania.forEach(function (z, i) { if (z.pisz(odczyty[i], dt)) dalej = true; });
+    if (dalej) ramka = window.requestAnimationFrame(klatkaWspolna);
+    else tRamki = 0;
+  };
+
+  var budz = function () {
+    if (!ramka && maRaf) ramka = window.requestAnimationFrame(klatkaWspolna);
+  };
+
+  var dodajZadanie = function (z) { zadania.push(z); budz(); };
+
+  if (maRaf) window.addEventListener('scroll', budz, { passive: true });
+
+  /* Wysokość ekranu do obliczeń ruchu. Na telefonie pasek adresu chowa się i wraca
+     w trakcie przewijania, a innerHeight skacze wtedy o 50–110 px. Wszystkie efekty
+     liczone od wysokości ekranu skakały razem z nim. Na ekranie dotykowym taką zmianę
+     pomijamy — liczy się dopiero obrót, zmiana szerokości albo duża różnica wysokości. */
+  var dotyk = window.matchMedia('(pointer: coarse)').matches;
+  // Na dotyku wysokość bloku początkowego (clientHeight) — nie zmienia się razem z paskiem adresu.
+  var zmierzEkran = function () {
+    return (dotyk ? document.documentElement.clientHeight : window.innerHeight) || window.innerHeight || 1;
+  };
+  var vhStala = zmierzEkran(), vwStala = window.innerWidth;
+  var wysokosc = function () { return vhStala; };
+  var poZmianie = [];   // moduły, które po prawdziwej zmianie rozmiaru muszą przeliczyć pomiary
+
+  window.addEventListener('resize', function () {
+    var w = window.innerWidth, hh = zmierzEkran();
+    if (dotyk && w === vwStala && Math.abs(hh - vhStala) < 160) return;
+    vwStala = w; vhStala = hh;
+    poZmianie.forEach(function (f) { f(); });
+    budz();
+  });
 
   /* Wspólny obserwator: element wchodzi na ekran raz i zostaje odsłonięty.
      Margines -12% od dołu opóźnia start do momentu, w którym element jest już widoczny,
@@ -120,7 +169,7 @@
     var linkList = [].slice.call(obszary.querySelectorAll('.obszary-lista a'));
     var N = panels.length;
     var mqPin = window.matchMedia('(min-width: 760px) and (min-height: 560px)');
-    var pin = false, aktywny = -1, obsTick = false;
+    var pin = false, aktywny = -1;
 
     var setActive = function (idx) {
       if (idx === aktywny) return;
@@ -136,14 +185,7 @@
     };
 
     // odległość do przewinięcia w torze: wysokość toru minus jeden ekran
-    var drogaToru = function () { return Math.max(1, tor.offsetHeight - window.innerHeight); };
-
-    var liczPin = function () {
-      obsTick = false;
-      if (!pin) return;
-      var p = clamp01(-tor.getBoundingClientRect().top / drogaToru());
-      setActive(Math.min(N - 1, Math.floor(p * N)));
-    };
+    var drogaToru = function () { return Math.max(1, tor.offsetHeight - wysokosc()); };
 
     var tryb = function () {
       pin = !reduced && mqPin.matches && N > 1;
@@ -153,7 +195,7 @@
         panels.forEach(function (p) { p.classList.remove('is-active', 'is-past'); });
         aktywny = -1;
       }
-      liczPin();
+      budz();
     };
 
     if (N) {
@@ -161,10 +203,11 @@
       setActive(0);
       tryb();
 
-      window.addEventListener('scroll', function () {
-        if (pin && !obsTick) { obsTick = true; window.requestAnimationFrame(liczPin); }
-      }, { passive: true });
-      window.addEventListener('resize', tryb);
+      dodajZadanie({
+        czytaj: function () { return pin ? clamp01(-tor.getBoundingClientRect().top / drogaToru()) : null; },
+        pisz: function (p) { if (p !== null) setActive(Math.min(N - 1, Math.floor(p * N))); }
+      });
+      poZmianie.push(tryb);
       if (mqPin.addEventListener) mqPin.addEventListener('change', tryb);
 
       // Klik w nazwę w trybie przypiętym: środek odcinka toru należącego do opisu.
@@ -270,7 +313,7 @@
         // nie w każdej klatce — przewijanie nie zmienia układu.
         var punkty = [];
         var zmierz = function () {
-          var vh = window.innerHeight, sy = window.pageYOffset;
+          var vh = wysokosc(), sy = window.pageYOffset;
           var maxY = document.documentElement.scrollHeight - vh;
           punkty = tony.map(function (el, i) {
             var r = el.getBoundingClientRect(), top = r.top + sy, y;
@@ -292,7 +335,7 @@
 
         var TAU = 250;            // ms — stała wygładzania; większa = łagodniej, ale z większym opóźnieniem
         var yPokaz = window.pageYOffset;
-        var ostatnio = 0, biegnie = false;
+        var ostatniKolor = '';    // zapis tylko przy zmianie — daleko od sceny kolor stoi i nic nie liczymy
 
         var maluj = function (y) {
           var a = punkty[0], b = punkty[0], t = 0;
@@ -309,6 +352,9 @@
             }
           }
 
+          var klucz = a.y + '|' + b.y + '|' + t.toFixed(4);
+          if (klucz === ostatniKolor) return;
+          ostatniKolor = klucz;
           var fg = mix3(a.ton.fg, b.ton.fg, t);
           var s = scena.style;
           s.setProperty('--bg', css(mix3(a.ton.bg, b.ton.bg, t), 1));
@@ -318,28 +364,23 @@
           s.setProperty('--rule', css(fg, lerp(a.ton.rulea, b.ton.rulea, t)));
         };
 
-        // Pętla działa tylko, dopóki kolor nie dogoni pozycji — potem stoi i nie zjada baterii.
-        var klatka = function (teraz) {
-          var dt = ostatnio ? Math.min(64, teraz - ostatnio) : 16;
-          ostatnio = teraz;
-          var cel = window.pageYOffset;
-          yPokaz += (cel - yPokaz) * (1 - Math.exp(-dt / TAU));
-          if (Math.abs(cel - yPokaz) < .5) yPokaz = cel;
-          maluj(yPokaz);
-          if (yPokaz !== cel) window.requestAnimationFrame(klatka);
-          else { biegnie = false; ostatnio = 0; }
-        };
-
-        var prosba = function () {
-          if (!biegnie) { biegnie = true; window.requestAnimationFrame(klatka); }
-        };
+        // Kolor goni pozycję tylko, dopóki jej nie dogoni — potem klatki stają i nie zjadają baterii.
+        var przelicz = function () { zmierz(); ostatniKolor = ''; maluj(yPokaz); budz(); };
 
         zmierz();
         maluj(yPokaz);
-        window.addEventListener('scroll', prosba, { passive: true });
-        window.addEventListener('resize', function () { zmierz(); maluj(yPokaz); prosba(); });
-        window.addEventListener('load', function () { zmierz(); maluj(yPokaz); prosba(); });
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { zmierz(); maluj(yPokaz); });
+        dodajZadanie({
+          czytaj: function () { return window.pageYOffset; },   // bez pomiaru układu
+          pisz: function (cel, dt) {
+            yPokaz += (cel - yPokaz) * (1 - Math.exp(-dt / TAU));
+            if (Math.abs(cel - yPokaz) < .5) yPokaz = cel;
+            maluj(yPokaz);
+            return yPokaz !== cel;
+          }
+        });
+        poZmianie.push(przelicz);
+        window.addEventListener('load', przelicz);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(przelicz);
       }
     }
   }
@@ -347,29 +388,31 @@
   /* 6. Paralaksa. Element sunie wolniej niż strona o wartość z data-px (w pikselach).
      Liczone względem środka ekranu, więc w punkcie zerowym element stoi tam,
      gdzie postawił go layout — pozycja bez skryptu jest zawsze poprawna. */
-  var pxNodes = [].slice.call(document.querySelectorAll('[data-px]'));
+  var pxNodes = [].slice.call(document.querySelectorAll('[data-px]')).map(function (el) {
+    return { el: el, ile: parseFloat(el.getAttribute('data-px')) || 0, y: 0 };
+  });
 
   if (pxNodes.length && !reduced) {
-    var ticking = false;
-
-    var onScroll = function () {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(function () {
-        var vh = window.innerHeight || 1;
-        pxNodes.forEach(function (el) {
-          var r = el.getBoundingClientRect();
-          if (r.bottom < -vh || r.top > vh * 2) return;   // poza zasięgiem: nie liczymy
-          var p = (r.top + r.height / 2 - vh / 2) / vh;    // -1 nad ekranem, +1 pod
-          el.style.setProperty('--px', (p * parseFloat(el.dataset.px)).toFixed(1) + 'px');
+    dodajZadanie({
+      czytaj: function () {
+        var vh = wysokosc();
+        return pxNodes.map(function (n) {
+          var r = n.el.getBoundingClientRect();
+          var top = r.top - n.y;                             // pozycja bez własnego przesunięcia
+          if (r.bottom - n.y < -vh || top > vh * 2) return null;   // poza zasięgiem: nie liczymy
+          return (top + r.height / 2 - vh / 2) / vh * n.ile;       // -1 nad ekranem, +1 pod
         });
-        ticking = false;
-      });
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    onScroll();
+      },
+      // Transformacja wprost w stylu elementu, nie przez zmienną CSS: zmienna dziedziczy się
+      // w dół i przeglądarka przeliczała styl całego poddrzewa w każdej klatce.
+      pisz: function (ys) {
+        pxNodes.forEach(function (n, i) {
+          if (ys[i] === null || Math.abs(ys[i] - n.y) < .05) return;
+          n.y = ys[i];
+          n.el.style.transform = 'translate3d(0,' + n.y.toFixed(1) + 'px,0)';
+        });
+      }
+    });
   }
 
   /* 6a. Głębia między sekcjami. Treść pola jedzie wolniej niż jego tło:
@@ -389,21 +432,20 @@
 
   if (warstwy.length && !reduced && 'requestAnimationFrame' in window) {
     var mqGlebia = window.matchMedia('(min-width: 1100px)');
-    var gTick = false;
     var ZAPAS = 27;   // px — tyle światła zostaje między treścią a następnym polem (3 × moduł --x)
 
-    var liczGlebie = function () {
-      gTick = false;
-      var vh = window.innerHeight || 1;
+    var czytajGlebie = function () {
+      var vh = wysokosc();
       var desk = mqGlebia.matches;
       var dWe = desk ? Math.min(vh * .12, 120) : Math.min(vh * .25, 200);   // opóźnienie treści przy wejściu pola
       var dWy = Math.min(vh * .28, 260);   // o tyle najwyżej zostaje w tyle, gdy pole znika u góry
       var skala = desk ? 0 : .08;          // o ile maleje przy wyjściu (tylko telefon)
       var gasn = desk ? .55 : .6;
 
-      // Najpierw wszystkie odczyty, potem zapisy — przeplatane wymuszałyby przeliczenie układu co sekcję.
-      var wyniki = warstwy.map(function (w) {
+      return warstwy.map(function (w) {
         var r = w.sec.getBoundingClientRect();
+        // Poza ekranem z zapasem: stan spoczynku, bez drugiego pomiaru.
+        if (r.bottom < -vh || r.top > vh * 2) return { y: 0, o: 1, s: 1 };
         // Dół treści bez obecnego przesunięcia = ile miejsca zostaje do dolnej krawędzi pola.
         var wolne = r.bottom - (w.el.getBoundingClientRect().bottom - w.y);
         var luz = Math.max(0, wolne - ZAPAS);
@@ -419,25 +461,28 @@
         y = Math.min(y, luz + Math.max(0, r.bottom - vh));
         return { y: y, o: o, s: s };
       });
+    };
 
+    // Transformacja i krycie wprost w stylu .wrap — zmienne CSS dziedziczyły się na całą treść sekcji
+    // i przeglądarka przeliczała jej styl w każdej klatce. Zapis tylko przy realnej zmianie.
+    var piszGlebie = function (wyniki) {
       warstwy.forEach(function (w, i) {
-        w.y = wyniki[i].y;
-        w.el.style.setProperty('--glebia', w.y.toFixed(1) + 'px');
-        w.el.style.setProperty('--glebia-krycie', wyniki[i].o.toFixed(3));
-        w.el.style.setProperty('--glebia-skala', wyniki[i].s.toFixed(4));
+        var v = wyniki[i];
+        var klucz = v.y.toFixed(1) + '|' + v.s.toFixed(4) + '|' + v.o.toFixed(3);
+        if (klucz === w.klucz) return;
+        w.klucz = klucz;
+        w.y = v.y;
+        w.el.style.transform = 'translate3d(0,' + v.y.toFixed(1) + 'px,0)' + (v.s < 1 ? ' scale(' + v.s.toFixed(4) + ')' : '');
+        w.el.style.opacity = v.o < 1 ? v.o.toFixed(3) : '';
       });
     };
 
-    // Klasy raz, przy starcie: głębia działa na każdej szerokości (proporcje liczy liczGlebie).
+    // Klasy raz, przy starcie: głębia działa na każdej szerokości (proporcje liczy czytajGlebie).
     document.documentElement.classList.add('glebia');
     warstwy.forEach(function (w) { w.el.classList.add('warstwa'); });
-    liczGlebie();
-    window.addEventListener('scroll', function () {
-      if (!gTick) { gTick = true; window.requestAnimationFrame(liczGlebie); }
-    }, { passive: true });
-    window.addEventListener('resize', liczGlebie);
-    if (mqGlebia.addEventListener) mqGlebia.addEventListener('change', liczGlebie);
-    else if (mqGlebia.addListener) mqGlebia.addListener(liczGlebie);
+    dodajZadanie({ czytaj: czytajGlebie, pisz: piszGlebie });
+    if (mqGlebia.addEventListener) mqGlebia.addEventListener('change', budz);
+    else if (mqGlebia.addListener) mqGlebia.addListener(budz);
   }
 
   /* 7. Kurtyna i pasek. Hero przypięte, „Punkt wyjścia” najeżdża na nie od dołu.
@@ -453,26 +498,26 @@
   if (kurtyna && hero && punkt) {
     var kurtynaLive = !reduced;
     kurtyna.classList.toggle('is-live', kurtynaLive);
-    var kTick = false;
+    var ostatnieK = '';
 
-    var ustawKurtyne = function () {
-      kTick = false;
-      var vh = window.innerHeight || 1;
-      var pTop = punkt.getBoundingClientRect().top;
-      if (kurtynaLive) {
-        hero.style.setProperty('--hero-top', Math.min(0, vh - hero.offsetHeight) + 'px');
-        hero.style.setProperty('--cover', clamp01(1 - pTop / vh).toFixed(4));
+    dodajZadanie({
+      czytaj: function () {
+        return { pTop: punkt.getBoundingClientRect().top, heroH: hero.offsetHeight };
+      },
+      pisz: function (m) {
+        var vh = wysokosc();
+        if (kurtynaLive) {
+          var klucz = Math.min(0, vh - m.heroH) + 'px|' + clamp01(1 - m.pTop / vh).toFixed(4);
+          if (klucz !== ostatnieK) {        // na dole strony zasłona stoi — nie przeliczamy stylu hero
+            ostatnieK = klucz;
+            var k = klucz.split('|');
+            hero.style.setProperty('--hero-top', k[0]);
+            hero.style.setProperty('--cover', k[1]);
+          }
+        }
+        if (bar) bar.classList.toggle('is-on', m.pTop <= 1);
       }
-      if (bar) bar.classList.toggle('is-on', pTop <= 1);
-    };
-
-    var prosbaK = function () {
-      if (!kTick) { kTick = true; window.requestAnimationFrame(ustawKurtyne); }
-    };
-
-    ustawKurtyne();
-    window.addEventListener('scroll', prosbaK, { passive: true });
-    window.addEventListener('resize', prosbaK);
+    });
   } else if (bar && hero && hasIO) {
     new IntersectionObserver(function (entries) {
       bar.classList.toggle('is-on', !entries[0].isIntersecting);
@@ -513,12 +558,12 @@
 
     var FALA = 7, TAU_R = 240;
     var mqSzeroki = window.matchMedia('(min-width: 1100px)');
-    var celR = 0, pokazR = -1, czolo = -1, rBiegnie = false, rOstatnio = 0;
+    var pokazR = -1, czolo = -1;
     redact.classList.add('is-redact');
 
     // Gdzie czoło powinno stać przy obecnej pozycji przewinięcia (w słowach, ułamkowo).
     var liczCel = function () {
-      var vh = window.innerHeight || 1;
+      var vh = wysokosc();
       var top = redact.getBoundingClientRect().top;
       var koniec = mqSzeroki.matches ? .1 : .25;   // akapit na tej wysokości = wszystko odsłonięte
       var p = clamp01((vh * .95 - top) / (vh * (.95 - koniec)));
@@ -535,25 +580,17 @@
       });
     };
 
-    var klatkaR = function (teraz) {
-      var dt = rOstatnio ? Math.min(64, teraz - rOstatnio) : 16;
-      rOstatnio = teraz;
-      pokazR += (celR - pokazR) * (1 - Math.exp(-dt / TAU_R));
-      if (Math.abs(celR - pokazR) < .3) pokazR = celR;
-      rysuj(Math.round(pokazR));
-      if (pokazR !== celR) window.requestAnimationFrame(klatkaR);
-      else { rBiegnie = false; rOstatnio = 0; }
-    };
-
-    var odslon = function () {
-      celR = liczCel();
-      if (pokazR < 0) { pokazR = celR; rysuj(Math.round(pokazR)); return; }   // start: bez gonienia
-      if (!rBiegnie) { rBiegnie = true; window.requestAnimationFrame(klatkaR); }
-    };
-
-    odslon();
-    window.addEventListener('scroll', odslon, { passive: true });
-    window.addEventListener('resize', odslon);
+    // Czoło nie skacze za pozycją, tylko ją goni (~0,25 s) — w rytmie wspólnej klatki.
+    dodajZadanie({
+      czytaj: liczCel,
+      pisz: function (cel, dt) {
+        if (pokazR < 0) { pokazR = cel; rysuj(Math.round(pokazR)); return false; }   // start: bez gonienia
+        pokazR += (cel - pokazR) * (1 - Math.exp(-dt / TAU_R));
+        if (Math.abs(cel - pokazR) < .3) pokazR = cel;
+        rysuj(Math.round(pokazR));
+        return pokazR !== cel;
+      }
+    });
   }
 
   /* 8. Forma w hero: kropka ze znaku, która się rozlewa. Siedem punktów na okręgu,
