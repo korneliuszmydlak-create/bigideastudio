@@ -92,8 +92,9 @@ a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px}
   scroll-margin-top:calc(var(--x) * 8);   /* wysokość paska przyklejonego + luz */
 }
 
+/* Telefon: 90 px zamiast 63 px — w tym odstępie treść zostaje w tyle przy głębi (app.js, 6a). */
 @media (max-width:760px){
-  .band{padding-block:calc(var(--x) * 7)}
+  .band{padding-block:calc(var(--x) * 10)}
 }
 
 /* Desktop: szerszy oddech między polami. Głębia (app.js, punkt 6a) przesuwa treść tylko w obrębie
@@ -390,21 +391,15 @@ h1,h2,h3{
   .hero-form{width:min(78vw, 29svh, 440px)}
 }
 
-/* Telefon: forma nad nagłówkiem, wyśrodkowana i duża — pierwsze, co widać po wejściu
-   (wzór: gong.pl). Szerokość ograniczona też wysokością ekranu, żeby na typowym telefonie
-   nagłówek zaczynał się jeszcze w pierwszym ekranie. Gdy hero jest wyższe niż ekran,
+/* Telefon: bez formy. Gdy hero jest wyższe niż ekran,
    kurtyna najpierw przewija je do końca (app.js, punkt 7), więc przycisk nie przepada. */
 @media (max-width:760px){
   .hero-inner{gap:calc(var(--x) * 1.5)}
   .hero-body{
     gap:calc(var(--x) * 3);
-    justify-content:flex-start;
+    justify-content:flex-end;          /* bez formy tekst stoi u dołu pierwszego ekranu, pod nim nic nie wisi */
   }
-  .hero-form{
-    order:-1;
-    width:min(84vw, 40svh, 360px);
-    margin-inline:auto;
-  }
+  .hero-form{display:none}             /* telefon bez formy — app.js (punkt 8) sam wstrzymuje wtedy animację */
 }
 
 /* W dwóch kolumnach forma wychodzi poza siatkę, w margines strony.
@@ -485,10 +480,13 @@ h1,h2,h3{
 
 /* Belka nie miga, tylko jedzie: wsuwa się nad słowo od lewej, a przy odsłonięciu
    zjeżdża w prawo — tekst wyłania się spod niej, a nie pojawia skokiem. */
+/* Góra belki 0,24em pod górą słowa: przy interlinii 1,14 zostaje ok. 0,16em światła
+   pod „p”, „y”, „ą” z wiersza wyżej. Przy 0,12em belka stała tuż pod nimi i litery
+   wyglądały na ucięte od dołu. */
 .is-redact .slowo::after{
   content:"";
   position:absolute;
-  inset:.12em 0 .02em;
+  inset:.24em 0 .02em;
   background:var(--fg);
   transform:scaleX(0);
   transform-origin:0 50%;
@@ -802,6 +800,11 @@ h1,h2,h3{
   text-wrap:balance;
 }
 
+/* Telefon: 7,56vw dawało ok. 29 px — mniej niż nagłówki sekcji. Tu zdanie jest całym polem. */
+@media (max-width:759px){
+  .plansza-line{font-size:clamp(2.4rem, 11.5vw, 3.6rem)}
+}
+
 /* --------------------------------------------------------------------------
    Schemat układu — koła ze znaku
    -------------------------------------------------------------------------- */
@@ -884,7 +887,7 @@ h1,h2,h3{
 /* --------------------------------------------------------------------------
    Obszary — trzy tryby:
    · bez skryptu: lista po lewej stoi, opisy jadą (desktop) albo zwykła lista (telefon)
-   · telefon: opisy są kartami, każda następna nachodzi na poprzednią
+   · telefon: zwykła lista na tle sekcji, opisy rozdzielone kreską — jak w pozostałych sekcjach
    · desktop ze skryptem (is-pin): kadr stoi, przewijanie przełącza opisy po kolei
    -------------------------------------------------------------------------- */
 
@@ -893,6 +896,17 @@ h1,h2,h3{
   font-weight:500;
   letter-spacing:-.01em;
   line-height:1.3;
+}
+
+/* Telefon: bez listy po lewej tytuł jest jedynym nagłówkiem sekcji — skala jak .h-sec. */
+@media (max-width:759px){
+  .obszary-tytul{
+    font-size:var(--t-h2);
+    font-weight:600;
+    letter-spacing:-.025em;
+    line-height:1.02;
+    padding-bottom:.06em;
+  }
 }
 
 .obszary-uklad{margin-top:calc(var(--x) * 4)}
@@ -917,18 +931,6 @@ h1,h2,h3{
   margin:calc(var(--x) * 2) 0 0;
   max-width:52ch;
   color:var(--fg-2);
-}
-
-/* Telefon: karty nachodzą na siebie. Równa minimalna wysokość sprawia, że następna
-   karta zakrywa poprzednią w całości — nie widać dwóch tekstów naraz. */
-@media (max-width:759px){
-  .obszar{
-    position:sticky;
-    top:calc(var(--x) * 7);   /* pod przyklejonym paskiem */
-    min-height:min(76svh, 560px);
-    background:var(--bg);
-    box-shadow:0 -14px 28px rgba(15,17,21,.06);   /* cień nad kartą: widać, że najeżdża */
-  }
 }
 
 @media (min-width:760px){
@@ -1367,11 +1369,6 @@ h1,h2,h3{
 .stopka-mail:hover,
 .stopka-mail:focus-visible{background-size:100% 1px}
 
-.stopka-miejsce{
-  margin:calc(var(--x) * 2) 0 0;
-  color:rgba(255,255,255,.66);
-}
-
 .stopka-dol{
   display:flex;
   flex-wrap:wrap;
@@ -1497,12 +1494,15 @@ h1,h2,h3{
 /* Głębia między sekcjami (desktop, app.js punkt 6a). Przesuwa się tylko .wrap,
    tło sekcji stoi. Każde pole leży warstwę wyżej niż poprzednie (kolejność z kodu),
    więc treść, która przy wyjściu zostaje w tyle, chowa się pod następnym polem,
-   zamiast na nie wchodzić. Klasy dokłada skrypt tylko od 1100 px. */
+   zamiast na nie wchodzić. Desktop i telefon mają osobne proporcje ruchu (app.js). */
 .glebia .band,
 .glebia .scena{position:relative;z-index:1}
 
+/* Skala tylko na telefonie (na desktopie zostaje 1). Oś u dołu treści: treść maleje
+   do własnej dolnej krawędzi, więc nigdy nie wychodzi na następne pole. */
 .warstwa{
-  transform:translate3d(0,var(--glebia,0px),0);
+  transform:translate3d(0,var(--glebia,0px),0) scale(var(--glebia-skala,1));
+  transform-origin:50% 100%;
   opacity:var(--glebia-krycie,1);
   will-change:transform,opacity;
 }
@@ -1606,7 +1606,6 @@ html.intro .blob{animation:none;opacity:0}
   .kwal-lista.is-armed li{opacity:1;transform:none}
   .kwal-lista.is-armed li::before{transform:none}
   .warstwa{transform:none;opacity:1}
-  .obszar{position:static}                  /* karty na telefonie bez nachodzenia */
   .sticky{transition:none}
   html{scroll-behavior:auto}
   .blob{animation:none;opacity:1}           /* kształt zostaje w klatce spoczynkowej */

@@ -29,14 +29,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&display=swap">
 <!-- ?v= wymusza pobranie nowej wersji mimo pamięci podręcznej przeglądarki i Cloudflare.
      Przy każdym wdrożeniu CSS lub JS podbij numer w obu linijkach. -->
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=25">
 <!-- Intro z logo (app.js, punkt 10). Decyzja zapada tu, przed pierwszym malowaniem,
      żeby hero nie mignęło przed zasłoną. Intro gra raz na kartę przeglądarki, nie przy
      wejściu na kotwicę (np. #kontakt) i nie przy ograniczonym ruchu. -->
 <script>
 try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&!sessionStorage.getItem('bis-intro'))document.documentElement.classList.add('intro')}catch(e){}
 </script>
-<script src="app.js?v=24" defer></script>
+<script src="app.js?v=25" defer></script>
 </head>
 <body>
 
@@ -105,8 +105,8 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
           </a>
         </div>
 
-        <!-- Powiększona kropka ze znaku. Na telefonie CSS stawia ją nad nagłówkiem (order),
-             w kodzie zostaje za tekstem, żeby czytnik ekranu zaczynał od nagłówka.
+        <!-- Powiększona kropka ze znaku. Na telefonie ukryta (CSS),
+             w kodzie stoi za tekstem, żeby czytnik ekranu zaczynał od nagłówka.
              Kształt w atrybucie d to klatka spoczynkowa —
              app.js (punkt 8) przelicza go w każdej klatce. Bez skryptu forma stoi nieruchomo. -->
         <div class="hero-form" aria-hidden="true">
@@ -308,7 +308,7 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
   <div class="scena" data-scena>
 
   <!-- 7 · ULTRA: plansza. Jedno zdanie na pełny ekran, z lekką paralaksą (data-px). -->
-  <section class="band band--ultra plansza" aria-label="Teza" data-ton="ultra">
+  <section class="band band--ultra plansza" aria-label="Teza" data-ton="ultra" data-warstwa="wejscie">
     <div class="wrap plansza-inner">
       <p class="plansza-line" data-mask data-px="-48">Marketing działa<br>jak naczynia połączone.</p>
     </div>
@@ -396,7 +396,6 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
       <div class="stopka-kontakt">
         <p class="stopka-etykieta">Kontakt</p>
         <a class="stopka-mail" href="mailto:kontakt@bigideastudio.pl">kontakt@bigideastudio.pl</a>
-        <p class="stopka-miejsce">Gdynia · praca zdalnie w&nbsp;całej Polsce</p>
       </div>
     </div>
 

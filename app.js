@@ -372,14 +372,16 @@
     onScroll();
   }
 
-  /* 6a. Głębia między sekcjami (desktop od 1100 px). Treść pola jedzie wolniej niż jego tło:
+  /* 6a. Głębia między sekcjami. Treść pola jedzie wolniej niż jego tło:
      przy wejściu dogania pole od dołu, przy wyjściu zostaje w tyle i gaśnie. Przesuwamy tylko .wrap,
      nigdy samą sekcję — tła, lepkie kadry (Obszary) i pomiary sceny oraz kurtyny zostają nietknięte.
      data-warstwa w markupie mówi, którą połowę ruchu dostaje pole: wejscie, wyjscie albo obie.
      Treść nigdy nie zjeżdża pod następne pole: przesunięcie nie przekracza wolnego miejsca
      pod treścią (dolny odstęp sekcji) minus zapas. Wcześniej zostawała w tyle o stałe 260 px
      i następne pole zasłaniało ostatnie wiersze, a w „O mnie” pół portretu.
-     Telefon, tablet w pionie i ograniczony ruch: nic się nie dzieje, układ jak bez skryptu. */
+     Poniżej 1100 px ruch jest mocniejszy, bo odstępy są mniejsze: treść wchodzi z większym
+     opóźnieniem, a przy wyjściu dodatkowo maleje (do 92%) i gaśnie mocniej.
+     Ograniczony ruch: nic się nie dzieje, układ jak bez skryptu. */
   var warstwy = [].slice.call(document.querySelectorAll('[data-warstwa]')).map(function (sec) {
     var jak = sec.getAttribute('data-warstwa');
     return { sec: sec, el: sec.querySelector('.wrap'), we: /wejscie/.test(jak), wy: /wyjscie/.test(jak), y: 0 };
@@ -387,15 +389,17 @@
 
   if (warstwy.length && !reduced && 'requestAnimationFrame' in window) {
     var mqGlebia = window.matchMedia('(min-width: 1100px)');
-    var glebiaOn = false, gTick = false;
+    var gTick = false;
     var ZAPAS = 27;   // px — tyle światła zostaje między treścią a następnym polem (3 × moduł --x)
 
     var liczGlebie = function () {
       gTick = false;
-      if (!glebiaOn) return;
       var vh = window.innerHeight || 1;
-      var dWe = Math.min(vh * .12, 120);   // o tyle treść odstaje od pola, gdy pole dopiero wchodzi
+      var desk = mqGlebia.matches;
+      var dWe = desk ? Math.min(vh * .12, 120) : Math.min(vh * .25, 200);   // opóźnienie treści przy wejściu pola
       var dWy = Math.min(vh * .28, 260);   // o tyle najwyżej zostaje w tyle, gdy pole znika u góry
+      var skala = desk ? 0 : .08;          // o ile maleje przy wyjściu (tylko telefon)
+      var gasn = desk ? .55 : .6;
 
       // Najpierw wszystkie odczyty, potem zapisy — przeplatane wymuszałyby przeliczenie układu co sekcję.
       var wyniki = warstwy.map(function (w) {
@@ -403,46 +407,37 @@
         // Dół treści bez obecnego przesunięcia = ile miejsca zostaje do dolnej krawędzi pola.
         var wolne = r.bottom - (w.el.getBoundingClientRect().bottom - w.y);
         var luz = Math.max(0, wolne - ZAPAS);
-        var y = 0, o = 1;
+        var y = 0, o = 1, s = 1;
         if (w.we && r.top > 0) y += clamp01(r.top / vh) * dWe;
         if (w.wy && r.bottom < vh) {
           var e = clamp01(1 - r.bottom / vh);
           y += e * Math.min(dWy, luz);      // skalowane, nie ucinane — ruch zostaje płynny
-          o = 1 - e * .55;
+          o = 1 - e * gasn;
+          s = 1 - e * skala;
         }
         // Część pod dolną krawędzią ekranu i tak jest niewidoczna, więc przy wejściu wolno więcej.
         y = Math.min(y, luz + Math.max(0, r.bottom - vh));
-        return { y: y, o: o };
+        return { y: y, o: o, s: s };
       });
 
       warstwy.forEach(function (w, i) {
         w.y = wyniki[i].y;
         w.el.style.setProperty('--glebia', w.y.toFixed(1) + 'px');
         w.el.style.setProperty('--glebia-krycie', wyniki[i].o.toFixed(3));
+        w.el.style.setProperty('--glebia-skala', wyniki[i].s.toFixed(4));
       });
     };
 
-    var trybGlebi = function () {
-      glebiaOn = mqGlebia.matches;
-      document.documentElement.classList.toggle('glebia', glebiaOn);
-      warstwy.forEach(function (w) {
-        w.el.classList.toggle('warstwa', glebiaOn);
-        if (!glebiaOn) {
-          w.el.style.removeProperty('--glebia');
-          w.el.style.removeProperty('--glebia-krycie');
-          w.y = 0;
-        }
-      });
-      liczGlebie();
-    };
-
-    trybGlebi();
+    // Klasy raz, przy starcie: głębia działa na każdej szerokości (proporcje liczy liczGlebie).
+    document.documentElement.classList.add('glebia');
+    warstwy.forEach(function (w) { w.el.classList.add('warstwa'); });
+    liczGlebie();
     window.addEventListener('scroll', function () {
-      if (glebiaOn && !gTick) { gTick = true; window.requestAnimationFrame(liczGlebie); }
+      if (!gTick) { gTick = true; window.requestAnimationFrame(liczGlebie); }
     }, { passive: true });
     window.addEventListener('resize', liczGlebie);
-    if (mqGlebia.addEventListener) mqGlebia.addEventListener('change', trybGlebi);
-    else if (mqGlebia.addListener) mqGlebia.addListener(trybGlebi);
+    if (mqGlebia.addEventListener) mqGlebia.addEventListener('change', liczGlebie);
+    else if (mqGlebia.addListener) mqGlebia.addListener(liczGlebie);
   }
 
   /* 7. Kurtyna i pasek. Hero przypięte, „Punkt wyjścia” najeżdża na nie od dołu.
