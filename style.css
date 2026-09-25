@@ -524,13 +524,14 @@ h1,h2,h3{
 .kwal-blok{margin-top:calc(var(--x) * 8)}
 .kwal-blok + .kwal-blok{margin-top:calc(var(--x) * 11)}
 
-/* Etykieta kolumny — waga 600, bez ozdobników: wagę pola niesie lista. */
+/* Etykieta kolumny — nagłówek listy. Skala tuż pod pozycjami listy (2,3rem), waga 700:
+   czyta się jako tytuł, nie jako podpis. Wcześniej 1,25rem ginęło obok dużej listy. */
 .kwal-etykieta{
   margin:0;
-  font-size:clamp(1.0625rem, 1.4vw, 1.25rem);
-  font-weight:600;
-  line-height:1.3;
-  letter-spacing:-.01em;
+  font-size:clamp(1.5rem, 2.2vw, 2rem);
+  font-weight:700;
+  line-height:1.15;
+  letter-spacing:-.022em;
 }
 
 .kwal-lista{
@@ -597,7 +598,7 @@ h1,h2,h3{
     align-items:start;
   }
   /* Etykieta na wysokości pierwszego wiersza listy, nie nad jego zaznaczeniem. */
-  .kwal-etykieta{position:sticky;top:calc(var(--x) * 12);padding-top:calc(var(--x) * 3.2 + .35em)}
+  .kwal-etykieta{position:sticky;top:calc(var(--x) * 12);padding-top:calc(var(--x) * 3.2 + .1em)}
   .kwal-lista{margin-top:0}
 }
 
@@ -629,23 +630,6 @@ h1,h2,h3{
   position:relative;
   overflow:hidden;
   padding-bottom:0;
-}
-
-/* Nazwisko w tle — faktura, nie treść. Sunie w poziomie za przewijaniem (--p z app.js). */
-.omnie-tlo{
-  position:absolute;
-  left:0;
-  top:calc(var(--x) * 5);
-  margin:0;
-  white-space:nowrap;
-  font-weight:700;
-  font-size:clamp(5rem, 19vw, 17rem);
-  line-height:.8;
-  letter-spacing:-.05em;
-  color:var(--fg);
-  opacity:.05;
-  pointer-events:none;
-  transform:translate3d(calc(var(--p,0) * -18vw),0,0);
 }
 
 .omnie-uklad{
@@ -712,6 +696,10 @@ h1,h2,h3{
 
 .omnie-lead{max-width:30ch}
 
+/* Nazwy z łącznikiem (E-commerce) nie mogą się łamać na „E-” / „commerce”.
+   Znak U+2011 odpada — Familjen Grotesk go nie ma. */
+.bez-lamania{white-space:nowrap}
+
 .omnie-proza{margin-top:calc(var(--x) * 4)}
 
 .omnie-proza p{
@@ -721,24 +709,68 @@ h1,h2,h3{
 
 .omnie-proza p + p{margin-top:calc(var(--x) * 2)}
 
-.omnie-meta{
-  margin-top:calc(var(--x) * 4);
+/* Dorobek: dwa bloki danych pod prozą. Każdy otwiera kreska i etykieta wersalikami —
+   ten sam zapis co etykiety w stopce, więc czyta się jako metryczka, nie jako treść. */
+.omnie-dorobek{margin-top:calc(var(--x) * 5)}
+
+.omnie-blok{
+  padding-top:calc(var(--x) * 2.5);
+  border-top:1px solid var(--rule);
+}
+
+.omnie-blok + .omnie-blok{margin-top:calc(var(--x) * 4)}
+
+.omnie-etykieta{
+  margin:0 0 calc(var(--x) * 1.5);
   font-size:.8125rem;
+  font-weight:500;
   letter-spacing:.14em;
   line-height:1.5;
   text-transform:uppercase;
+  color:var(--fg-2);
 }
 
-/* Dawni pracodawcy: rząd nazw oddzielony kreską — dane, ale w kolorze tekstu. */
-.omnie-proza .omnie-marki{
-  margin-top:calc(var(--x) * 3);
-  padding-top:calc(var(--x) * 3);
-  border-top:1px solid var(--rule);
-  font-size:1rem;
+/* Firmy: nazwa pogrubiona, dopowiedzenie w drugorzędnym kolorze, wiersze rozdzielone kreską. */
+.omnie-firmy{
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+
+.omnie-firmy li{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:0 calc(var(--x) * 2);
+  padding-block:calc(var(--x) * 1.2);
+  line-height:1.4;
+}
+
+.omnie-firmy li + li{border-top:1px solid var(--rule)}
+.omnie-firmy strong{font-weight:600;color:var(--fg)}
+.omnie-firmy span{color:var(--fg-2)}
+
+/* Marki: jeden ciąg nazw z ukośnikami — ukośnik w drugorzędnym kolorze, żeby nie konkurował z nazwą.
+   Ukośnik stoi ZA nazwą, więc przy łamaniu kończy wiersz, a nie zaczyna następny. */
+.omnie-marki{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:flex;
+  flex-wrap:wrap;
   font-weight:600;
-  letter-spacing:-.005em;
-  line-height:1.5;
+  line-height:1.6;
   color:var(--fg);
+}
+
+.omnie-marki li{white-space:nowrap}
+
+.omnie-marki li:not(:last-child)::after{
+  content:"/";
+  margin-inline:.45em;
+  font-weight:400;
+  color:var(--fg-2);
 }
 
 /* --------------------------------------------------------------------------
@@ -945,10 +977,8 @@ h1,h2,h3{
   .obszary.is-live .obszary-lista a:hover,
   .obszary.is-live .obszary-lista a[aria-current="true"]{color:var(--fg)}
 
-  .obszary-opisy{
-    border-left:1px solid var(--rule);
-    padding-block:15svh;
-  }
+  /* Bez pionowej kreski między listą a opisami — kolumny rozdziela sam odstęp. */
+  .obszary-opisy{padding-block:15svh}
 
   .obszar{
     min-height:70svh;
@@ -972,9 +1002,10 @@ h1,h2,h3{
 
 /* --- tryb przypięty (desktop, klasa z app.js, punkt 4) ------------------- */
 
-/* Tor przewijania: ekran + 62% ekranu na każdy opis. --n = liczba opisów. */
+/* Tor przewijania: ekran + 34% ekranu na każdy opis (ok. 3 ruchy kółkiem myszy).
+   Wcześniej 62% — opis zmieniał się dopiero po 5–6 ruchach. --n = liczba opisów. */
 .obszary.is-pin{padding-block:0}
-.obszary.is-pin .obszary-tor{height:calc(100svh + var(--n,5) * 62svh)}
+.obszary.is-pin .obszary-tor{height:calc(100svh + var(--n,5) * 34svh)}
 
 .obszary.is-pin .obszary-kadr{
   position:sticky;
@@ -995,28 +1026,6 @@ h1,h2,h3{
 
 .obszary.is-pin .obszary-uklad{flex:1;min-height:0;margin-top:calc(var(--x) * 3)}
 .obszary.is-pin .obszary-nav{position:static;height:auto}
-
-/* Oś postępu przy liście: szara szyna, akcent rośnie w dół. */
-.obszary.is-pin .obszary-os{padding-left:calc(var(--x) * 3.5)}
-
-.obszary.is-pin .obszary-os::before,
-.obszary-postep{
-  position:absolute;
-  left:0;
-  top:.3em;
-  bottom:.3em;
-  width:2px;
-}
-
-.obszary.is-pin .obszary-os::before{content:"";background:var(--rule)}
-.obszary-postep{display:none}
-
-.obszary.is-pin .obszary-postep{
-  display:block;
-  background:var(--accent);
-  transform:scaleY(var(--p,0));
-  transform-origin:50% 0;
-}
 
 .obszary.is-pin .obszary-opisy{
   position:relative;
@@ -1321,36 +1330,25 @@ h1,h2,h3{
 
 .stopka-nav a,
 .stopka-gora-link{
-  display:inline-flex;
-  align-items:center;
-  gap:calc(var(--x) * 1.8);
+  display:inline-block;
   font-weight:500;
   letter-spacing:-.01em;
 }
 
 .stopka-nav a{font-size:clamp(1.125rem, 1.6vw, 1.375rem)}
 
-/* Okrągła strzałka — koło to reguła strony dla akcji. Po najechaniu: Ultra z bielą (6,7:1). */
-.krazek{
-  flex:none;
-  display:inline-grid;
-  place-items:center;
-  width:calc(var(--x) * 5);
-  height:calc(var(--x) * 5);
-  border-radius:50%;
-  background:rgba(255,255,255,.09);
-  color:#fff;
-  transition:background-color .3s var(--ease-out),transform .4s var(--ease-out);
+/* Po najechaniu linia rośnie od lewej — ten sam ruch co przy adresie e-mail. */
+.stopka-nav a span,
+.stopka-gora-link span{
+  background:linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition:background-size .45s var(--ease-out);
+  padding-bottom:.1em;
 }
 
-.krazek svg{width:18px;height:18px}
-
-.stopka a:hover .krazek,
-.stopka a:focus-visible .krazek{background:var(--bis-accent)}
-.stopka-nav a:hover .krazek,
-.stopka-nav a:focus-visible .krazek{transform:translateX(4px)}
-.stopka-gora-link:hover .krazek,
-.stopka-gora-link:focus-visible .krazek{transform:translateY(-4px)}
+.stopka-nav a:hover span,
+.stopka-nav a:focus-visible span,
+.stopka-gora-link:hover span,
+.stopka-gora-link:focus-visible span{background-size:100% 1px}
 
 .stopka-mail{
   font-size:clamp(1.125rem, 1.6vw, 1.375rem);
@@ -1601,7 +1599,6 @@ html.intro .blob{animation:none;opacity:0}
   [data-kola] li{opacity:1;transform:none}
   .plansza-line[data-px],
   .sygnatura,
-  .omnie-tlo,
   .omnie-kolo-px,
   .omnie-kolo{transform:none}
   .omnie-kolo{opacity:1}

@@ -29,14 +29,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&display=swap">
 <!-- ?v= wymusza pobranie nowej wersji mimo pamięci podręcznej przeglądarki i Cloudflare.
      Przy każdym wdrożeniu CSS lub JS podbij numer w obu linijkach. -->
-<link rel="stylesheet" href="style.css?v=22">
+<link rel="stylesheet" href="style.css?v=24">
 <!-- Intro z logo (app.js, punkt 10). Decyzja zapada tu, przed pierwszym malowaniem,
      żeby hero nie mignęło przed zasłoną. Intro gra raz na kartę przeglądarki, nie przy
      wejściu na kotwicę (np. #kontakt) i nie przy ograniczonym ruchu. -->
 <script>
 try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&!sessionStorage.getItem('bis-intro'))document.documentElement.classList.add('intro')}catch(e){}
 </script>
-<script src="app.js?v=22" defer></script>
+<script src="app.js?v=24" defer></script>
 </head>
 <body>
 
@@ -202,7 +202,6 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
                   <li><a href="#obszar-strategia">Strategia i&nbsp;marka</a></li>
                   <li><a href="#obszar-kreacja">Kreacja i&nbsp;produkcja</a></li>
                 </ol>
-                <span class="obszary-postep" aria-hidden="true"></span>
               </div>
             </nav>
 
@@ -256,29 +255,44 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
   </section>
 
   <!-- 6 · BIEL: kto za tym stoi. Portret stoi na kole Ultra — tej samej kropce co w znaku
-       i w hero. Koło rośnie, portret odsłania się od dołu, w tle sunie nazwisko.
+       i w hero. Koło rośnie, portret odsłania się od dołu.
        Dół portretu jest dociśnięty do krawędzi pola, więc cięcie w pasie czyta się jako zamierzone. -->
   <section id="o-mnie" class="band band--paper omnie" aria-labelledby="omnie-tytul" data-warstwa="wejscie wyjscie">
-    <p class="omnie-tlo" aria-hidden="true" data-drift>Korneliusz Mydlak</p>
-
     <div class="wrap omnie-uklad">
       <div class="omnie-scena" data-anim>
         <span class="omnie-kolo-px" data-px="-60" aria-hidden="true"><span class="omnie-kolo"></span></span>
         <picture class="omnie-portret">
           <source srcset="portret-km.webp" type="image/webp">
-          <img src="portret-km.png" alt="Korneliusz Mydlak" width="522" height="759" loading="lazy" decoding="async">
+          <img src="portret-km.png" alt="Korneliusz Mydlak" width="1044" height="1518" loading="lazy" decoding="async">
         </picture>
       </div>
 
       <div class="omnie-tekst">
-        <h2 class="h-sec" id="omnie-tytul" data-mask>Byłem po drugiej stronie.</h2>
-        <p class="lead omnie-lead" data-reveal>Płaciłem agencjom i&nbsp;rozliczałem ich wyniki.</p>
+        <h2 class="h-sec" id="omnie-tytul" data-mask>Odpowiadałem<br>za wynik.</h2>
+        <p class="lead omnie-lead" data-reveal>Dzieliłem budżet i&nbsp;rozliczałem jego efekt.</p>
 
         <div class="prose omnie-proza" data-reveal data-reveal-scope>
-          <p>Nazywam się Korneliusz Mydlak. Przez ok. 14 lat prowadziłem marketing w&nbsp;retail fashion i&nbsp;FMCG, w&nbsp;tym na stanowiskach Head of Marketing i&nbsp;CMO. Pracowałem m.in. w&nbsp;kaes./Worldbox (Grupa CCC) i&nbsp;Trec Nutrition (Grupa Aflofarm), wcześniej w&nbsp;agencji digital.</p>
-          <p>Dziś pracuję jako zewnętrzny growth manager. Celowo prowadzę tylko kilka marek jednocześnie: rozmawiasz ze mną, a&nbsp;nie z&nbsp;opiekunem konta, i&nbsp;to ja siedzę w&nbsp;Twoich danych.</p>
-          <p class="omnie-meta">SGH, Uniwersytet Gdański.</p>
-          <p class="omnie-marki">Doświadczenie z: kaes. · Worldbox · Grupa CCC · Trec Nutrition · Grupa Aflofarm</p>
+          <p>Nazywam się Korneliusz Mydlak, marketing prowadzę od 2011 roku. W&nbsp;Trec Nutrition (Grupa Aflofarm) byłem Head of Marketing&nbsp;&amp; <span class="bez-lamania">E-commerce</span>. W&nbsp;kaes. (Grupa CCC) byłem Head of Marketing, a&nbsp;sieć urosła w&nbsp;tym czasie z&nbsp;46 do 150 sklepów.</p>
+          <p>Dziś prowadzę growth management, czyli odpowiadam za to, jak rośnie sprzedaż. Celowo pracuję z&nbsp;kilkoma firmami naraz. Rozmawiasz ze mną i&nbsp;to ja analizuję Twoje dane.</p>
+        </div>
+
+        <div class="omnie-dorobek" data-reveal data-reveal-scope>
+          <div class="omnie-blok">
+            <h3 class="omnie-etykieta">Doświadczenie</h3>
+            <ul class="omnie-firmy">
+              <li><strong>Worldbox</strong> <span>Grupa CCC</span></li>
+              <li><strong>kaes.</strong> <span>dawniej KS-SPORT</span></li>
+              <li><strong>Trec Nutrition</strong> <span>Grupa Aflofarm</span></li>
+              <li><strong>Zjednoczenie.com</strong> <span>Agencja Interaktywna</span></li>
+            </ul>
+          </div>
+
+          <div class="omnie-blok">
+            <h3 class="omnie-etykieta">Współpraca</h3>
+            <ul class="omnie-marki">
+              <li>4F</li><li>Cropp</li><li>GAP</li><li>House</li><li>MTV</li><li>New Balance</li><li>Nickelodeon</li><li>Oceanic S.A.</li><li>Prosto</li><li>Puma</li><li>Tom Tailor</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -358,7 +372,7 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
 </main>
 
 <!-- Stopka: nawigacja, kanały i dane firmy. Grafit odcina ją od Ultra kontaktu.
-     Okrągłe strzałki to ta sama kategoria co przycisk w hero — koło oznacza akcję. -->
+     Linki bez strzałek — po najechaniu podkreślenie, jak przy adresie e-mail. -->
 <footer class="stopka">
   <div class="wrap">
     <div class="stopka-gora">
@@ -372,10 +386,10 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
       <nav class="stopka-nav" aria-label="Stopka">
         <p class="stopka-etykieta">Strona</p>
         <ul>
-          <li><a href="#dla-kogo"><span>Dla kogo pracuję</span><span class="krazek"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li>
-          <li><a href="#obszary"><span>Zakres usług</span><span class="krazek"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li>
-          <li><a href="#o-mnie"><span>O&nbsp;mnie</span><span class="krazek"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li>
-          <li><a href="#wspolpraca"><span>Współpraca</span><span class="krazek"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li>
+          <li><a href="#dla-kogo"><span>Dla kogo pracuję</span></a></li>
+          <li><a href="#obszary"><span>Zakres usług</span></a></li>
+          <li><a href="#o-mnie"><span>O&nbsp;mnie</span></a></li>
+          <li><a href="#wspolpraca"><span>Współpraca</span></a></li>
         </ul>
       </nav>
 
@@ -392,7 +406,7 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
         <a class="stopka-ikona" href="mailto:kontakt@bigideastudio.pl" aria-label="Napisz e-mail"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 6.5h17v11h-17zM4 7l8 6.2L20 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></a>
       </div>
       <p class="stopka-prawne">Big Idea Studio · Gdynia · NIP 7393381438 · © <span data-year>2026</span></p>
-      <a class="stopka-gora-link" href="#top"><span>Do góry</span><span class="krazek"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M6 11l6-6 6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+      <a class="stopka-gora-link" href="#top"><span>Do góry</span></a>
     </div>
   </div>
 </footer>

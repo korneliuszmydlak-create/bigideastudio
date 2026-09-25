@@ -110,13 +110,12 @@
 
   /* 4. Obszary. Desktop (min. 760 × 560 px, bez ograniczonego ruchu): kadr przypięty,
      przewijanie po torze przełącza opisy — aktywny jest dokładnie jeden, poprzednie
-     dostają is-past. Oś przy liście pokazuje postęp (--p).
+     dostają is-past. Aktywną pozycję listy wyróżnia sam kolor (aria-current).
      Poza tym trybem: stary obserwator środka ekranu podświetla nazwę po lewej. */
   var obszary = document.querySelector('[data-obszary]');
 
   if (obszary) {
     var tor = obszary.querySelector('.obszary-tor');
-    var postep = obszary.querySelector('.obszary-postep');
     var panels = [].slice.call(obszary.querySelectorAll('[data-obszar]'));
     var linkList = [].slice.call(obszary.querySelectorAll('.obszary-lista a'));
     var N = panels.length;
@@ -143,7 +142,6 @@
       obsTick = false;
       if (!pin) return;
       var p = clamp01(-tor.getBoundingClientRect().top / drogaToru());
-      if (postep) postep.style.setProperty('--p', p.toFixed(4));
       setActive(Math.min(N - 1, Math.floor(p * N)));
     };
 
@@ -348,10 +346,8 @@
 
   /* 6. Paralaksa. Element sunie wolniej niż strona o wartość z data-px (w pikselach).
      Liczone względem środka ekranu, więc w punkcie zerowym element stoi tam,
-     gdzie postawił go layout — pozycja bez skryptu jest zawsze poprawna.
-     data-drift dostaje samą pozycję (--p, bez jednostki) — przesunięcie liczy CSS,
-     bo poziomy ruch nazwiska w „O mnie” skaluje się z szerokością ekranu, nie w pikselach. */
-  var pxNodes = [].slice.call(document.querySelectorAll('[data-px], [data-drift]'));
+     gdzie postawił go layout — pozycja bez skryptu jest zawsze poprawna. */
+  var pxNodes = [].slice.call(document.querySelectorAll('[data-px]'));
 
   if (pxNodes.length && !reduced) {
     var ticking = false;
@@ -365,8 +361,7 @@
           var r = el.getBoundingClientRect();
           if (r.bottom < -vh || r.top > vh * 2) return;   // poza zasięgiem: nie liczymy
           var p = (r.top + r.height / 2 - vh / 2) / vh;    // -1 nad ekranem, +1 pod
-          el.style.setProperty('--p', p.toFixed(4));
-          if (el.hasAttribute('data-px')) el.style.setProperty('--px', (p * parseFloat(el.dataset.px)).toFixed(1) + 'px');
+          el.style.setProperty('--px', (p * parseFloat(el.dataset.px)).toFixed(1) + 'px');
         });
         ticking = false;
       });
