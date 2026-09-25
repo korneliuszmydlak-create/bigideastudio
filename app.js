@@ -10,6 +10,7 @@
   // Znacznik działającego skryptu — CSS ukrywa stany początkowe animacji tylko pod nim,
   // więc bez JS portret, znak w kontakcie i listy stoją w całości.
   document.documentElement.classList.add('js');
+  window.bisApp = true;   // wyłącza bezpiecznik z <head>
 
   var clamp01 = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
   var maRaf = 'requestAnimationFrame' in window;
@@ -157,79 +158,55 @@
     reveal([kola]);
   }
 
-  /* 4. Obszary. Desktop (min. 760 × 560 px, bez ograniczonego ruchu): kadr przypięty,
-     przewijanie po torze przełącza opisy — aktywny jest dokładnie jeden, poprzednie
-     dostają is-past. Aktywną pozycję listy wyróżnia sam kolor (aria-current).
-     Poza tym trybem: stary obserwator środka ekranu podświetla nazwę po lewej. */
+  /* 4. Zakres usług: akordeon od 760 px. Nagłówki <h3> dostają przycisk z aria-expanded,
+     pierwszy opis otwarty, pozostałe zwinięte; otwartych może być kilka naraz.
+     Przycisk powstaje tu, nie w markupie: bez skryptu i poniżej 760 px nagłówek jest zwykłym
+     nagłówkiem, a wszystkie opisy stoją rozwinięte — nie ma przycisku, który nic nie robi.
+     Zwinięty opis ma visibility:hidden (CSS), więc znika też z kolejności tabulacji i dla czytnika. */
   var obszary = document.querySelector('[data-obszary]');
 
   if (obszary) {
-    var tor = obszary.querySelector('.obszary-tor');
-    var panels = [].slice.call(obszary.querySelectorAll('[data-obszar]'));
-    var linkList = [].slice.call(obszary.querySelectorAll('.obszary-lista a'));
-    var N = panels.length;
-    var mqPin = window.matchMedia('(min-width: 760px) and (min-height: 560px)');
-    var pin = false, aktywny = -1;
+    var mqAkordeon = window.matchMedia('(min-width: 760px)');
+    var pozycje = [].slice.call(obszary.querySelectorAll('.obszar')).map(function (art, i) {
+      var nag = art.querySelector('.obszar-naglowek');
+      var tresc = art.querySelector('.obszar-tresc');
+      return nag && tresc ? { art: art, nag: nag, tresc: tresc, tekst: nag.innerHTML, otwarty: i === 0, btn: null } : null;
+    }).filter(Boolean);
 
-    var setActive = function (idx) {
-      if (idx === aktywny) return;
-      aktywny = idx;
-      panels.forEach(function (p, k) {
-        p.classList.toggle('is-active', k === idx);
-        p.classList.toggle('is-past', k < idx);
-      });
-      linkList.forEach(function (a, k) {
-        if (k === idx) a.setAttribute('aria-current', 'true');
-        else a.removeAttribute('aria-current');
-      });
+    var ustawPozycje = function (poz) {
+      poz.btn.setAttribute('aria-expanded', poz.otwarty ? 'true' : 'false');
+      poz.art.classList.toggle('is-otwarty', poz.otwarty);
     };
 
-    // odległość do przewinięcia w torze: wysokość toru minus jeden ekran
-    var drogaToru = function () { return Math.max(1, tor.offsetHeight - wysokosc()); };
-
-    var tryb = function () {
-      pin = !reduced && mqPin.matches && N > 1;
-      obszary.classList.toggle('is-pin', pin);
-      obszary.style.setProperty('--n', N);
-      if (!pin) {
-        panels.forEach(function (p) { p.classList.remove('is-active', 'is-past'); });
-        aktywny = -1;
-      }
-      budz();
-    };
-
-    if (N) {
-      obszary.classList.add('is-live');
-      setActive(0);
-      tryb();
-
-      dodajZadanie({
-        czytaj: function () { return pin ? clamp01(-tor.getBoundingClientRect().top / drogaToru()) : null; },
-        pisz: function (p) { if (p !== null) setActive(Math.min(N - 1, Math.floor(p * N))); }
-      });
-      poZmianie.push(tryb);
-      if (mqPin.addEventListener) mqPin.addEventListener('change', tryb);
-
-      // Klik w nazwę w trybie przypiętym: środek odcinka toru należącego do opisu.
-      linkList.forEach(function (a, k) {
-        a.addEventListener('click', function (e) {
-          if (!pin) return;
-          e.preventDefault();
-          var top = tor.getBoundingClientRect().top + window.pageYOffset;
-          window.scrollTo({ top: top + drogaToru() * (k + .5) / N, behavior: reduced ? 'auto' : 'smooth' });
-        });
-      });
-
-      if (hasIO) {
-        var obsIO = new IntersectionObserver(function (entries) {
-          if (pin) return;
-          entries.forEach(function (entry) {
-            if (entry.isIntersecting) { aktywny = -1; setActive(panels.indexOf(entry.target)); }
+    var trybAkordeonu = function () {
+      var akordeon = mqAkordeon.matches;
+      obszary.classList.toggle('is-akordeon', akordeon);
+      pozycje.forEach(function (poz) {
+        if (akordeon && !poz.btn) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'obszar-przycisk';
+          btn.setAttribute('aria-controls', poz.tresc.id);
+          btn.innerHTML = '<span class="obszar-nazwa">' + poz.tekst + '</span><span class="obszar-znak" aria-hidden="true"></span>';
+          btn.addEventListener('click', function () {
+            poz.otwarty = !poz.otwarty;
+            ustawPozycje(poz);
           });
-        }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
-        panels.forEach(function (el) { obsIO.observe(el); });
-      }
-    }
+          poz.nag.innerHTML = '';
+          poz.nag.appendChild(btn);
+          poz.btn = btn;
+          ustawPozycje(poz);
+        } else if (!akordeon && poz.btn) {
+          poz.nag.innerHTML = poz.tekst;
+          poz.btn = null;
+          poz.art.classList.remove('is-otwarty');
+        }
+      });
+    };
+
+    trybAkordeonu();
+    if (mqAkordeon.addEventListener) mqAkordeon.addEventListener('change', trybAkordeonu);
+    else if (mqAkordeon.addListener) mqAkordeon.addListener(trybAkordeonu);
   }
 
   /* 5. Scena: wspólne tło planszy, współpracy i kontaktu, mieszane ze scrollem.
@@ -526,15 +503,13 @@
 
   /* 7a. Teza spod belek. Tekst dzielony na słowa (każde razem ze spacją za nim, więc belki
      łączą się w ciągły pas). Słowa przed czołem są jawne, 7 kolejnych stoi pod belką,
-     reszta czeka niewidoczna. Przy ograniczonym ruchu i bez skryptu tekst stoi w całości.
-     Dwie poprawki pod desktop:
-     a) Czoło nie skacze za pozycją, tylko ją goni (~0,25 s). Kółko myszy przewija
-        po ~100 px — wcześniej jeden „ząbek” odsłaniał naraz 8 słów i animacji nie było widać.
-     b) Od 1100 px odsłanianie kończy się, gdy akapit dojdzie do 10% wysokości ekranu,
-        a nie do 25% — ostatnie słowa odsłaniają się już na zatrzymanym polu, nie w trakcie kurtyny. */
+     reszta czeka niewidoczna. Odsłanianie rusza samo, gdy 30% akapitu jest na ekranie,
+     i trwa ok. 1,2 s — nie zależy od dalszego przewijania (wcześniej czoło szło za pozycją
+     i kto zatrzymał się w pół drogi, widział pół zdania pod belkami).
+     Przy ograniczonym ruchu i bez skryptu tekst stoi w całości. */
   var redact = document.querySelector('[data-redact]');
 
-  if (redact && !reduced && 'requestAnimationFrame' in window) {
+  if (redact && !reduced && hasIO && 'requestAnimationFrame' in window) {
     var slowa = [];
     var tnij = function (node) {
       [].slice.call(node.childNodes).forEach(function (n) {
@@ -556,19 +531,9 @@
     };
     tnij(redact);
 
-    var FALA = 7, TAU_R = 240;
-    var mqSzeroki = window.matchMedia('(min-width: 1100px)');
-    var pokazR = -1, czolo = -1;
+    var FALA = 7, CZAS_R = 1200;
+    var czolo = -1;
     redact.classList.add('is-redact');
-
-    // Gdzie czoło powinno stać przy obecnej pozycji przewinięcia (w słowach, ułamkowo).
-    var liczCel = function () {
-      var vh = wysokosc();
-      var top = redact.getBoundingClientRect().top;
-      var koniec = mqSzeroki.matches ? .1 : .25;   // akapit na tej wysokości = wszystko odsłonięte
-      var p = clamp01((vh * .95 - top) / (vh * (.95 - koniec)));
-      return p * (slowa.length + FALA);
-    };
 
     var rysuj = function (nowe) {
       if (nowe === czolo) return;
@@ -580,17 +545,22 @@
       });
     };
 
-    // Czoło nie skacze za pozycją, tylko ją goni (~0,25 s) — w rytmie wspólnej klatki.
-    dodajZadanie({
-      czytaj: liczCel,
-      pisz: function (cel, dt) {
-        if (pokazR < 0) { pokazR = cel; rysuj(Math.round(pokazR)); return false; }   // start: bez gonienia
-        pokazR += (cel - pokazR) * (1 - Math.exp(-dt / TAU_R));
-        if (Math.abs(cel - pokazR) < .3) pokazR = cel;
-        rysuj(Math.round(pokazR));
-        return pokazR !== cel;
-      }
-    });
+    var koniecR = slowa.length + FALA;
+    var startR = 0;
+    var krokR = function (t) {
+      if (!startR) startR = t;
+      var p = clamp01((t - startR) / CZAS_R);
+      rysuj(Math.round(p * koniecR));
+      if (p < 1) window.requestAnimationFrame(krokR);
+    };
+
+    rysuj(0);
+    var redactIO = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) return;
+      redactIO.disconnect();
+      window.requestAnimationFrame(krokR);
+    }, { threshold: 0.3 });
+    redactIO.observe(redact);
   }
 
   /* 8. Forma w hero: kropka ze znaku, która się rozlewa. Siedem punktów na okręgu,

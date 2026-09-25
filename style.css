@@ -27,7 +27,7 @@
   --maxw: 1180px;
 
   /* skala typograficzna */
-  --t-hero: clamp(2.35rem, 6.8vw, 5.4rem);
+  --t-hero: clamp(2.1rem, 5.6vw, 3.75rem);   /* trzy linie hero w wysokości dawnych dwóch */
   --t-h2:   clamp(2.1rem, 5.4vw, 4.4rem);
   --t-lead: clamp(1.1rem, 1.9vw, 1.45rem);
   --t-item: clamp(1.15rem, 2vw, 1.5rem);
@@ -317,13 +317,31 @@ h1,h2,h3{
 @media (min-width:1100px){
   .hero-body{
     display:grid;
-    /* 1,35 : 0,65 — najdłuższy wiersz nagłówka („Twojej sprzedaży” ≈ 627 px przy 86 px)
-       mieści się w kolumnie. Przy 1 : 0,85 nagłówek łamał się na pięć wierszy. */
+    /* 1,35 : 0,65 — najdłuższy wiersz nagłówka („Prowadzony osobiście.”) mieści się w kolumnie,
+       a portret ma szerokość formy ze znaku. */
     grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr);
     align-items:center;
-    gap:calc(var(--x) * 8);
+    gap:calc(var(--x) * 6);
   }
 }
+
+/* Eyebrow nad nagłówkiem: segment i kategorie w jednym wierszu. Półgruby zamiast wersalików —
+   przy ponad 50 znakach rozstrzelone wersaliki czytały się jak baner, nie jak etykieta. */
+.hero-eyebrow{
+  margin:0 0 calc(var(--x) * 2.5);
+  max-width:62ch;
+  font-size:clamp(.9375rem, 1.2vw, 1.0625rem);
+  font-weight:600;
+  line-height:1.4;
+  letter-spacing:.01em;
+  color:#fff;
+  text-wrap:balance;
+}
+
+/* Trzy linie zamiast dwóch przy tej samej wysokości bloku co wcześniej (1440 × 900: ok. 223 px),
+   więc stopień hero zszedł z 86 do ok. 60 px. Trzecia linia w bieli 78% — dopowiedzenie,
+   nie trzeci akcent: bez tego trzy linie w 600 stały jak jedna ciężka plama. */
+.h-hero-dop{color:rgba(255,255,255,.78)}
 
 /* Lead w hero: tłumaczy nazwę usługi. Szersza miara niż .lead, bo 34ch dawało
    siedem wierszy i spychało przycisk pod pierwszy ekran. */
@@ -369,51 +387,63 @@ h1,h2,h3{
 .btn-connect:hover{background:var(--bis-accent);color:#fff}
 .btn-connect:hover svg{background:#fff;color:var(--bis-accent);transform:translateX(15%)}
 
-/* --- forma: powiększona kropka ze znaku --------------------------------- */
+/* --- scena w hero: portret przed formą ze znaku ------------------------- */
 
-.hero-form{
-  justify-self:end;
-  /* Układ pionowy: forma stoi pod tekstem, więc jej rozmiar ogranicza
-     nie tylko szerokość ekranu, ale i to, ile wysokości zostało pod tekstem. */
-  width:min(78vw, 36svh, 440px);
+/* Poniżej 1100 px: sam portret pod przyciskiem, bez formy (app.js, punkt 8, wstrzymuje wtedy animację).
+   Dół dociśnięty do dolnej krawędzi pola — ujemny margines zjada dolny padding .hero-inner,
+   tak jak w „O mnie” cięcie w pasie czyta się jako zamierzone. Wysokość do 40svh,
+   żeby nagłówek, lead i przycisk zmieściły się nad nim na 390 × 844. */
+.hero-scena{
+  position:relative;
+  align-self:center;
+  margin-top:auto;
+  margin-bottom:calc(var(--x) * -3);
+}
+
+.hero-form{display:none}
+
+.hero-portret{display:block;position:relative}
+.hero-portret img{
+  width:auto;
+  height:min(40svh, 520px);
   max-width:100%;
-  margin-inline:auto 0;
+  object-fit:contain;
+  object-position:50% 100%;
 }
 
-/* Niski ekran: mniej światła, żeby forma nie zeszła pod krawędź. */
-@media (max-height:800px) and (max-width:1099px){
-  .hero-inner{gap:calc(var(--x) * 2)}
-  .hero-body{gap:calc(var(--x) * 3)}
+@supports not (height:40svh){
+  .hero-portret img{height:min(40vh, 520px)}
 }
 
-/* Bardzo niski ekran (iPhone SE i podobne): forma mniejsza, żeby zmieściła się na pierwszym ekranie. */
-@media (max-height:780px) and (max-width:1099px){
-  .hero-form{width:min(78vw, 29svh, 440px)}
-}
-
-/* Telefon: bez formy. Gdy hero jest wyższe niż ekran,
-   kurtyna najpierw przewija je do końca (app.js, punkt 7), więc przycisk nie przepada. */
 @media (max-width:760px){
   .hero-inner{gap:calc(var(--x) * 1.5)}
-  /* Tekst w górnej części ekranu, puste pole Ultra pod nim. Kurtyna najeżdża od dołu,
-     więc najpierw zasłania pustkę, a przycisk zostaje widoczny przez ok. 40% ekranu przewijania.
-     Przy tekście dociśniętym do dołu zasłona przykrywała przycisk już po kilku pikselach. */
   .hero-body{
     gap:calc(var(--x) * 3);
     justify-content:flex-start;
-    padding-top:clamp(calc(var(--x) * 3), 7svh, calc(var(--x) * 9));
+    padding-top:clamp(calc(var(--x) * 1.5), 3svh, calc(var(--x) * 5));
   }
-  .hero-form{display:none}             /* telefon bez formy — app.js (punkt 8) sam wstrzymuje wtedy animację */
 }
 
-/* W dwóch kolumnach forma wychodzi poza siatkę, w margines strony.
-   Ujemny margines jest ograniczony tak, by zawsze zostały min. 32 px do krawędzi ekranu. */
+/* Od 1100 px: forma ze znaku jako tło, portret przed nią. Kolumna sceny schodzi do dołu pola
+   i wychodzi poza siatkę w margines strony (min. 32 px do krawędzi ekranu).
+   Szerokość ograniczona też wysokością ekranu: portret nie może wejść pod logo. */
 @media (min-width:1100px){
-  .hero-form{
-    width:clamp(250px, 32vw, 480px);   /* węższa kolumna formy — mniejsza bryła, żeby nie weszła na tekst */
-    max-width:none;
+  .hero-body{align-items:center}
+  .hero-scena{
+    align-self:end;
+    justify-self:end;
+    margin-top:0;
+    width:clamp(260px, min(32vw, calc((100svh - 150px) * .688)), 480px);
     margin-right:calc(-1 * clamp(0px, (100vw - 1180px) / 2 - 32px, 110px));
   }
+  .hero-form{
+    display:block;
+    position:absolute;
+    left:-6%;
+    top:-2%;
+    width:112%;
+  }
+  .hero-portret img{width:100%;height:auto}
 }
 
 .hero-form svg{
@@ -627,11 +657,14 @@ h1,h2,h3{
    O mnie — portret na kole ze znaku
    -------------------------------------------------------------------------- */
 
-/* Dół pola bez paddingu: portret stoi na krawędzi sekcji. */
+/* Od 1100 px dół pola bez paddingu: portret stoi na krawędzi sekcji. */
 .omnie{
   position:relative;
   overflow:hidden;
-  padding-bottom:0;
+}
+
+@media (max-width:1099px){
+  .omnie-scena{width:min(100%, 360px);margin-inline:0;border-bottom:1px solid var(--rule)}
 }
 
 .omnie-uklad{
@@ -640,11 +673,12 @@ h1,h2,h3{
   gap:calc(var(--x) * 6);
 }
 
-/* Mobile: tekst pierwszy, portret na końcu — dociśnięty do dolnej krawędzi pola. */
-.omnie-tekst{order:1}
+/* Poniżej 1100 px portret przed tekstem, nad nagłówkiem „Odpowiadałem za wynik.”
+   Pole wraca wtedy do zwykłego dolnego odstępu, a cięcie portretu w pasie domyka kreska. */
+.omnie-tekst{order:2}
 
 .omnie-scena{
-  order:2;
+  order:1;
   position:relative;
   width:min(100%, 420px);
   margin-inline:auto;
@@ -685,7 +719,8 @@ h1,h2,h3{
 .omnie-scena.is-in .omnie-kolo{transform:none;opacity:1}
 .omnie-scena.is-in .omnie-portret{clip-path:inset(0)}
 
-@media (min-width:1000px){
+@media (min-width:1100px){
+  .omnie{padding-bottom:0}
   .omnie-uklad{
     grid-template-columns:minmax(0,1fr) minmax(0,1fr);
     gap:calc(var(--x) * 8);
@@ -729,6 +764,14 @@ h1,h2,h3{
   line-height:1.5;
   text-transform:uppercase;
   color:var(--fg-2);
+}
+
+/* Etykieta-zdanie („Wcześniej, w agencji…”): bez wersalików i rozstrzelenia —
+   przy pełnym zdaniu wersaliki czytały się jak krzyk, nie jak metryczka. */
+.omnie-etykieta--zdanie{
+  font-size:.9375rem;
+  letter-spacing:0;
+  text-transform:none;
 }
 
 /* Firmy: nazwa pogrubiona, dopowiedzenie w drugorzędnym kolorze, wiersze rozdzielone kreską. */
@@ -799,7 +842,10 @@ h1,h2,h3{
   font-size:clamp(1.82rem,7.56vw,6.58rem);   /* 70% poprzedniej skali — zdanie ma oddech, nie ścianę */
   line-height:.95;
   letter-spacing:-.02em;
-  margin:0;
+  /* Plansza jedzie z paralaksą (data-px), więc jej ramka też musi mieścić dół ostatniej linii.
+     Zapas w paddingu, zwrócony ujemnym marginesem — położenie tekstu bez zmian. */
+  padding-block:.12em .3em;
+  margin:-.12em 0 -.3em;
   text-wrap:balance;
 }
 
@@ -888,14 +934,11 @@ h1,h2,h3{
 }
 
 /* --------------------------------------------------------------------------
-   Obszary — trzy tryby:
-   · bez skryptu: lista po lewej stoi, opisy jadą (desktop) albo zwykła lista (telefon)
-   · telefon: zwykła lista na tle sekcji, opisy rozdzielone kreską — jak w pozostałych sekcjach
-   · desktop ze skryptem (is-pin): kadr stoi, przewijanie przełącza opisy po kolei
+   Zakres usług — akordeon od 760 px (app.js, punkt 4)
+   · bez skryptu i poniżej 760 px: wszystkie opisy rozwinięte, rozdzielone kreską
+   · od 760 px: nagłówek jest przyciskiem, zwinięty opis ma zerową wysokość i visibility:hidden
    -------------------------------------------------------------------------- */
 
-/* Tytuł w skali nagłówków sekcji (.h-sec). Wcześniej miał rozmiar leadu (ok. 23 px)
-   i stał pod listą jak podpis, choć to nagłówek całej sekcji. */
 .obszary-tytul{
   font-size:var(--t-h2);
   font-weight:600;
@@ -903,15 +946,14 @@ h1,h2,h3{
   padding-bottom:.06em;
 }
 
-.obszary-uklad{margin-top:calc(var(--x) * 4)}
-
-/* Mobile: bez listy po lewej — nazwy powtarzałyby tytuły opisów tuż pod nimi. */
-.obszary-nav{display:none}
+.obszary-akordeon{margin-top:calc(var(--x) * 4)}
 
 .obszar{
   border-top:1px solid var(--rule);
   padding-block:calc(var(--x) * 4);
 }
+
+.obszar:last-child{border-bottom:1px solid var(--rule)}
 
 /* Interlinia 1,12 i zapas pod spodem — przy 1,02 Familjen gubił dół „ę”, „ą” i „j”. */
 .obszar h3{
@@ -923,138 +965,99 @@ h1,h2,h3{
 
 .obszar p{
   margin:calc(var(--x) * 2) 0 0;
-  max-width:52ch;
+  max-width:60ch;
   color:var(--fg-2);
 }
 
-@media (min-width:760px){
-  .obszary-uklad{
-    display:grid;
-    grid-template-columns:minmax(0,5fr) minmax(0,6fr);
-    margin-top:0;
-  }
+/* Pierwsze zdanie w kolorze tekstu głównego — czyta się samo, reszta dopowiada. */
+.obszar p strong{font-weight:600;color:var(--fg)}
 
-  /* Kolumna ma wysokość ekranu i przykleja się do jego góry, a lista stoi w jej środku. */
-  .obszary-nav{
+@media (min-width:760px){
+  .obszary-akordeon{margin-top:calc(var(--x) * 6)}
+  .obszar{padding-block:0}
+  .obszar h3{font-size:clamp(1.75rem, 3.2vw, 3rem)}
+  .obszary:not(.is-akordeon) .obszar{padding-block:calc(var(--x) * 4)}
+
+  /* Cały wiersz jest przyciskiem: nazwa po lewej, kółko z plusem po prawej.
+     Koło to reguła dla akcji na tej stronie (przycisk w hero, LinkedIn, „Kontakt” w pasku). */
+  .obszar-przycisk{
     display:flex;
     align-items:center;
-    position:sticky;
-    top:0;
-    height:100svh;
-    align-self:start;
-    padding-right:calc(var(--x) * 4);
-  }
-
-  .obszary-os{position:relative}
-
-  .obszary-lista{
+    justify-content:space-between;
+    gap:calc(var(--x) * 3);
+    width:100%;
     margin:0;
-    padding:0;
-    list-style:none;
+    padding:calc(var(--x) * 3.5) 0;
+    background:none;
+    border:0;
+    color:inherit;
+    font:inherit;
+    letter-spacing:inherit;
+    line-height:inherit;
+    text-align:left;
   }
 
-  .obszary-lista li + li{margin-top:calc(var(--x) * 1.2)}
+  .obszar-przycisk:focus-visible{outline-offset:6px}
 
-  .obszary-lista a{
-    display:inline-block;
-    padding-bottom:.06em;
-    font-weight:600;
-    font-size:clamp(1.6rem, 3.3vw, 3rem);
-    line-height:1.12;
-    text-wrap:balance;
-    letter-spacing:-.015em;   /* było -.035: „nw” w „konwersja” i „wt” w „Growth” zlewały się */
-    text-decoration:none;
-    color:var(--fg);
-    transition:color .45s var(--ease-out);
+  .obszar-znak{
+    position:relative;
+    flex:none;
+    width:calc(var(--x) * 5.5);
+    height:calc(var(--x) * 5.5);
+    border:1.5px solid currentColor;
+    border-radius:50%;
+    transition:background-color .3s var(--ease-out),color .3s var(--ease-out);
   }
 
-  /* Wygaszanie dopiero, gdy skrypt śledzi przewijanie. #575B62 na Mist = 5,6:1. */
-  .obszary.is-live .obszary-lista a{color:var(--fg-2)}
-  .obszary.is-live .obszary-lista a:hover,
-  .obszary.is-live .obszary-lista a[aria-current="true"]{color:var(--fg)}
-
-  /* Bez pionowej kreski między listą a opisami — kolumny rozdziela sam odstęp. */
-  .obszary-opisy{padding-block:15svh}
-
-  .obszar{
-    min-height:70svh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    padding:calc(var(--x) * 5) 0 calc(var(--x) * 5) calc(var(--x) * 6);
-    scroll-margin-top:15svh;
+  /* Plus z dwóch kresek; pionowa składa się przy otwarciu, zostaje minus. */
+  .obszar-znak::before,
+  .obszar-znak::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:36%;
+    height:1.5px;
+    background:currentColor;
+    transform:translate(-50%,-50%);
+    transition:transform .35s var(--ease-out);
   }
 
-  .obszar:first-child{border-top:0}
-}
+  .obszar-znak::after{transform:translate(-50%,-50%) rotate(90deg)}
+  .obszar.is-otwarty .obszar-znak::after{transform:translate(-50%,-50%) rotate(0deg)}
 
-@supports not (height:100svh){
-  @media (min-width:760px){
-    .obszary-nav{height:100vh}
-    .obszary-opisy{padding-block:15vh}
-    .obszar{min-height:70vh;scroll-margin-top:15vh}
+  @media (hover:hover){
+    .obszar-przycisk:hover .obszar-znak{background:var(--bis-accent);border-color:var(--bis-accent);color:#fff}
   }
+
+  /* Zwijanie przez wysokość wiersza siatki 0fr → 1fr — płynnie, bez mierzenia w JS.
+     visibility z opóźnieniem: zwinięty opis znika z tabulacji i dla czytnika dopiero po animacji. */
+  .is-akordeon .obszar-tresc{
+    display:grid;
+    grid-template-rows:0fr;
+    visibility:hidden;
+    transition:grid-template-rows .5s var(--ease-out),visibility 0s linear .5s;
+  }
+
+  .is-akordeon .obszar.is-otwarty .obszar-tresc{
+    grid-template-rows:1fr;
+    visibility:visible;
+    transition:grid-template-rows .5s var(--ease-out),visibility 0s linear 0s;
+  }
+
+  .is-akordeon .obszar-tresc-in{min-height:0;overflow:hidden}
+
+  .is-akordeon .obszar p{
+    margin-top:0;
+    font-size:1.125rem;
+    line-height:1.5;
+  }
+
+  .is-akordeon .obszar-tresc-in > :last-child{margin-bottom:calc(var(--x) * 4)}
+
+  /* Opisy pod nazwą, ale w prawej części wiersza — nazwy tworzą czytelną kolumnę po lewej. */
+  .is-akordeon .obszar-tresc-in{padding-left:min(24%, 260px)}
 }
-
-/* --- tryb przypięty (desktop, klasa z app.js, punkt 4) ------------------- */
-
-/* Tor przewijania: ekran + 42% ekranu na każdy opis (ok. 4 ruchy kółkiem myszy).
-   62% było za długo (5–6 ruchów), 34% za krótko — opisy migały, zanim dało się je przeczytać. */
-.obszary.is-pin{padding-block:0}
-.obszary.is-pin .obszary-tor{height:calc(100svh + var(--n,5) * 42svh)}
-
-.obszary.is-pin .obszary-kadr{
-  position:sticky;
-  top:0;
-  height:100svh;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  padding-block:calc(var(--x) * 11) calc(var(--x) * 6);
-}
-
-.obszary.is-pin .obszary-kadr > .wrap{
-  flex:1;
-  min-height:0;
-  display:flex;
-  flex-direction:column;
-}
-
-.obszary.is-pin .obszary-uklad{flex:1;min-height:0;margin-top:calc(var(--x) * 3)}
-
-/* Kadr ma równo wysokość ekranu: na niskim laptopie tytuł nie może zabrać miejsca opisom. */
-.obszary.is-pin .obszary-tytul{font-size:min(var(--t-h2), 8.5svh)}
-.obszary.is-pin .obszary-nav{position:static;height:auto}
-
-.obszary.is-pin .obszary-opisy{
-  position:relative;
-  padding-block:0;
-}
-
-/* Wszystkie opisy w jednym miejscu. Poprzedni odjeżdża w górę i gaśnie,
-   następny wchodzi od dołu z krótkim opóźnieniem — nigdy nie stoją razem. */
-.obszary.is-pin .obszar{
-  position:absolute;
-  inset:0;
-  min-height:0;
-  border-top:0;
-  opacity:0;
-  transform:translate3d(0,7vh,0);
-  transition:opacity .45s ease,transform .9s var(--ease-out);
-  pointer-events:none;
-}
-
-.obszary.is-pin .obszar.is-past{transform:translate3d(0,-7vh,0)}
-
-.obszary.is-pin .obszar.is-active{
-  opacity:1;
-  transform:none;
-  pointer-events:auto;
-  transition-delay:.18s;
-}
-
-.obszary.is-pin .obszar h3{font-size:clamp(1.9rem, 3.2vw, 3rem)}
-.obszary.is-pin .obszar p{font-size:1.125rem;line-height:1.5}
 
 /* --------------------------------------------------------------------------
    Współpraca — typografia jako grafika (wzór: basicagency.com)
@@ -1084,7 +1087,9 @@ h1,h2,h3{
   text-wrap:nowrap;
 }
 
-.wsp-pol{display:block}
+/* Każda połowa wjeżdża osobno (data-reveal). Przy interlinii 0,9 przecinek i dół liter
+   wystawały z ramki — zapas w paddingu, zwrócony ujemnym marginesem. */
+.wsp-pol{display:block;padding-block:.1em .2em;margin-block:-.1em -.2em}
 
 /* Kropka ze znaku, w kolorze tekstu — otwiera drugą połowę zdania. */
 .wsp-kropka{
@@ -1106,7 +1111,7 @@ h1,h2,h3{
   }
 
   /* druga połowa schodzi o dwie linie — oko przeskakuje przez pole po przekątnej */
-  .wsp-pol--2{margin-top:1.9em}
+  .wsp-pol--2{margin-top:1.8em}   /* 1,9em minus 0,1em zapasu z paddingu powyżej */
 }
 
 .steps{
@@ -1157,20 +1162,16 @@ h1,h2,h3{
    Kontakt — pole akcentu zamyka stronę
    -------------------------------------------------------------------------- */
 
-/* Jedno słowo na całą szerokość pola. Dzielnik 4,42 = zmierzona szerokość „KONTAKT.”
-   w em (Familjen 700, -0,045em, wersaliki). Zmiana tekstu, wagi lub kroju = nowy pomiar. */
-/* Ujemny lewy margines = lewy odstęp litery „K” w Familjen 700 (0,063em). Przy 238 px
-   to 15 px, więc tytuł stał wyraźnie na prawo od tekstu pod nim. Teraz krawędź „K”
-   stoi na tej samej linii co lead, adres e-mail i znak. */
+/* Zdanie zamiast jednego słowa: skala planszy, zwykłe litery, łamanie z balance.
+   Stopień dobrany pomiarem: maks. 2 linie przy 1440 px, maks. 3 przy 390 px. */
 .kontakt-tytul{
-  margin-left:-.063em;
-  font-size:calc((min(100vw, var(--maxw)) - 2 * var(--gutter)) / 4.42);
+  margin-left:-.04em;
+  max-width:14ch;
+  font-size:clamp(2.6rem, 8.4vw, 7.25rem);
   font-weight:700;
-  letter-spacing:-.045em;
-  line-height:.86;
-  text-transform:uppercase;
-  white-space:nowrap;
-  text-wrap:nowrap;
+  letter-spacing:-.035em;
+  line-height:.95;
+  text-wrap:balance;
 }
 
 /* Hierarchia: tytuł (grafika) → adres e-mail (działanie) → instrukcja (tekst).
@@ -1186,54 +1187,31 @@ h1,h2,h3{
   text-wrap:pretty;
 }
 
-/* Mail i LinkedIn w jednym rzędzie — dwa równorzędne kanały. Na wąskim ekranie łamią się. */
-.kontakt-kanaly{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:calc(var(--x) * 2.5) calc(var(--x) * 4);
-  margin-top:calc(var(--x) * 5);
+/* Mail i telefon jeden pod drugim, bez linii i kolumn — dwie linie jednego bloku.
+   Waga 500, nie 600: pod tytułem w 700 adres ma być czytelny, nie krzyczeć. */
+.kontakt-kanaly{margin-top:calc(var(--x) * 6)}
+
+.kontakt-glowny{
+  margin:0;
+  font-weight:500;
+  font-size:clamp(1.5rem, 6.8vw, 3.6rem);   /* 360 px: adres mieści się w jednej linii */
+  letter-spacing:-.025em;
+  line-height:1.15;
 }
 
-.mailto{
-  display:inline-block;
-  font-weight:600;
-  font-size:clamp(1.75rem, 7.8vw, 3.6rem);   /* telefon: adres na całą szerokość siatki, nie 2/3 */
-  letter-spacing:-.02em;
-  line-height:1.05;
+/* Linia rysuje się od lewej po najechaniu albo przy fokusie — w spoczynku tekst stoi czysty. */
+.kontakt-link{
   text-decoration:none;
-  word-break:break-word;
-  padding-bottom:.08em;
-  /* Linia rysuje się od lewej po najechaniu albo fokusie — w spoczynku adres stoi czysty. */
+  overflow-wrap:anywhere;
+  padding-bottom:.04em;
   background:linear-gradient(currentColor, currentColor) 0 100% / 0 2px no-repeat;
   transition:background-size .5s var(--ease-out);
 }
 
-.mailto:focus-visible{background-size:100% 2px}
-
-/* LinkedIn: obrys w kształcie pigułki, ta sama kategoria co „Kontakt” w pasku.
-   Kolory ze zmiennych sceny, więc przycisk nadąża za przejściem tła. */
-.kontakt-in{
-  display:inline-flex;
-  align-items:center;
-  gap:calc(var(--x) * 1.2);
-  padding:calc(var(--x) * 1.3) calc(var(--x) * 2.6) calc(var(--x) * 1.3) calc(var(--x) * 2);
-  border:1.5px solid currentColor;
-  border-radius:999px;
-  font-weight:600;
-  font-size:clamp(1.0625rem, 1.3vw, 1.25rem);   /* przy 58 px adresu 17 px wyglądało na przypis */
-  line-height:1;
-  text-decoration:none;
-  transition:background-color .3s var(--ease-out),color .3s var(--ease-out);
-}
-
-.kontakt-in svg{width:20px;height:20px;flex:none}
-
-.kontakt-in:hover,
-.kontakt-in:focus-visible{background:var(--fg);color:var(--bg)}
+.kontakt-link:focus-visible{background-size:100% 2px}
 
 @media (hover:hover){
-  .mailto:hover{background-size:100% 2px}
+  .kontakt-link:hover{background-size:100% 2px}
 }
 
 /* tekst tylko dla czytników ekranu */
@@ -1361,6 +1339,9 @@ h1,h2,h3{
 .stopka-gora-link:hover span,
 .stopka-gora-link:focus-visible span{background-size:100% 1px}
 
+/* Mail i telefon jeden pod drugim, w tym samym stylu. */
+.stopka-kontakt{display:grid;justify-items:start;align-content:start;gap:calc(var(--x) * 1.2)}
+
 .stopka-mail{
   font-size:clamp(1.125rem, 1.6vw, 1.375rem);
   font-weight:500;
@@ -1437,7 +1418,7 @@ h1,h2,h3{
   button,
   summary{cursor:var(--kursor), pointer}
 
-  .hero-form,
+  .hero-scena,
   .kola li,
   .kwal-lista li,
   .omnie-scena,
@@ -1452,26 +1433,30 @@ h1,h2,h3{
    Krzywa startuje szybko i długo wytraca — stąd wrażenie ciężaru, a nie skoku. */
 :root{--ease-out:cubic-bezier(.16,1,.3,1)}
 
-[data-reveal]{
+/* Stan startowy tylko pod .js — bez skryptu cała treść stoi widoczna (wcześniej znikała). */
+.js [data-reveal]{
   opacity:0;
   transform:translateY(18px);
   transition:opacity 1s var(--ease-out),transform 1s var(--ease-out);
 }
 
-[data-reveal].is-in{opacity:1;transform:none}
+.js [data-reveal].is-in{opacity:1;transform:none}
 
 /* Nagłówki wjeżdżają linia po linii spod krawędzi maski.
    Zapas góra/dół oddany ujemnym marginesem. Dół 0,3em: Familjen ma głębokie
-   wydłużenia dolne — przy 0,14em maska ucinała „g”, „p”, „j” i ogonki „ę”, „ą”. */
+   wydłużenia dolne (ok. 0,18em pod linią pisma), a nagłówki mają interlinię 0,9–1,05.
+   Zapas siedzi w animowanym wierszu (i), nie w masce: ramka, która się przesuwa, musi
+   obejmować całe litery — inaczej Safari ucina dół „g”, „p”, „j” i ogonki „ę”, „ą”.
+   Wysokość maski bez zmian, więc układ zostaje co do piksela. */
 .mask{
   display:block;
   overflow:hidden;
-  padding:.12em 0 .3em;
   margin:-.12em 0 -.3em;
 }
 
 .mask > i{
   display:block;
+  padding:.12em 0 .3em;
   font-style:normal;
   transform:translateY(115%);
   transition:transform 1.15s var(--ease-out);
@@ -1482,7 +1467,7 @@ h1,h2,h3{
 
 /* Koła startują rozsunięte (--tx/--ty liczy JS: wektor od huba) i zjeżdżają się
    w jeden układ — schemat pokazuje to, co mówi zdanie pod nim. */
-[data-kola] li{
+.js [data-kola] li{
   opacity:0;
   transform:translate3d(var(--tx,0px),var(--ty,0px),0) scale(.88);
   /* opóźnienie kaskady dotyczy tylko wejścia — kolor po najechaniu reaguje od razu */
@@ -1494,7 +1479,7 @@ h1,h2,h3{
     color .35s ease;
 }
 
-[data-kola].is-in li{opacity:1;transform:none}
+.js [data-kola].is-in li{opacity:1;transform:none}
 
 /* Nic nie wystaje poza szerokość ekranu. Koła w „Pięciu obszarach” startują rozsunięte
    na boki i przed wejściem wychodziły 23 px za prawą krawędź telefonu — strona robiła się

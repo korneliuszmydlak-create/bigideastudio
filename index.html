@@ -18,25 +18,31 @@
 <meta property="og:title" content="Big Idea Studio – growth management i kampanie płatne">
 <meta property="og:description" content="Rentowny wzrost sprzedaży. Kampanie, strona i marka w jednym planie, prowadzone osobiście.">
 <!-- og:image wymaga pełnego adresu — ścieżka względna nie daje podglądu na LinkedInie i Facebooku. -->
-<meta property="og:url" content="https://bigideastudio.pl/">
-<meta property="og:image" content="https://bigideastudio.pl/bisogimage1200x630.png">
+<meta property="og:url" content="https://bigideastudio.eu/">
+<meta property="og:image" content="https://bigideastudio.eu/bisogimage1200x630.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Big Idea Studio">
+<link rel="canonical" href="https://bigideastudio.eu/">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&display=swap">
 <!-- ?v= wymusza pobranie nowej wersji mimo pamięci podręcznej przeglądarki i Cloudflare.
      Przy każdym wdrożeniu CSS lub JS podbij numer w obu linijkach. -->
-<link rel="stylesheet" href="style.css?v=28">
+<link rel="stylesheet" href="style.css?v=34">
 <!-- Intro z logo (app.js, punkt 10). Decyzja zapada tu, przed pierwszym malowaniem,
      żeby hero nie mignęło przed zasłoną. Intro gra raz na kartę przeglądarki, nie przy
      wejściu na kotwicę (np. #kontakt) i nie przy ograniczonym ruchu. -->
 <script>
 try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&!sessionStorage.getItem('bis-intro'))document.documentElement.classList.add('intro')}catch(e){}
+/* Klasa js przed pierwszym malowaniem: stany startowe animacji ukrywa tylko .js, więc bez niej
+   treść mignęłaby i zniknęła, zanim app.js (defer) ruszy. Bezpiecznik: gdy app.js nie wystartuje
+   w 3 s (np. brak pliku), znikają klasy js i intro, a cała treść stoi, jak na stronie bez skryptu. */
+document.documentElement.classList.add('js');
+setTimeout(function(){if(!window.bisApp)document.documentElement.classList.remove('js','intro')},3000);
 </script>
-<script src="app.js?v=28" defer></script>
+<script src="app.js?v=34" defer></script>
 </head>
 <body>
 
@@ -92,27 +98,36 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
 
       <div class="hero-body">
         <div class="hero-text">
-          <h1 class="h-hero" data-mask>Rentowny wzrost<br>Twojej sprzedaży</h1>
+          <p class="hero-eyebrow" data-reveal>Growth management dla marek D2C: moda, kosmetyki, suplementy</p>
+          <h1 class="h-hero" data-mask>Rentowny wzrost<br>Twojej marki.<br><span class="h-hero-dop">Prowadzony osobiście.</span></h1>
 
-          <p class="lead hero-lead" data-reveal>Jestem Korneliusz Mydlak. Przez 14 lat prowadziłem marketing po stronie marek, m.in. w&nbsp;kaes./Worldbox (Grupa CCC) i&nbsp;Trec Nutrition (Grupa Aflofarm). Dziś jako zewnętrzny growth manager łączę kampanie, sklep, ofertę i&nbsp;markę w&nbsp;jeden plan, który następnie koordynuję w&nbsp;organizacjach.</p>
+          <p class="lead hero-lead" data-reveal>Jestem Korneliusz Mydlak. Przez 14 lat odpowiadałem za marketing po stronie marek, m.in. jako Head of Marketing w&nbsp;kaes. (Grupa CCC) i&nbsp;Trec Nutrition (Grupa Aflofarm). Dziś jako zewnętrzny growth manager łączę kampanie, sklep, ofertę i&nbsp;marżę w&nbsp;jeden plan i&nbsp;sam go prowadzę.</p>
 
           <!-- Jeden link, dwa segmenty wizualne — jeden przystanek tabulacji dla jednej akcji. -->
           <a class="btn-connect" href="#kontakt" data-reveal>
-            <span>Umówmy rozmowę</span>
+            <span>Umów 30 minut rozmowy</span>
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M6 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </a>
+
         </div>
 
-        <!-- Powiększona kropka ze znaku. Na telefonie ukryta (CSS),
-             w kodzie stoi za tekstem, żeby czytnik ekranu zaczynał od nagłówka.
-             Kształt w atrybucie d to klatka spoczynkowa —
-             app.js (punkt 8) przelicza go w każdej klatce. Bez skryptu forma stoi nieruchomo. -->
-        <div class="hero-form" aria-hidden="true">
+        <!-- Portret w hero. W kodzie za tekstem, więc czytnik ekranu zaczyna od nagłówka.
+             Desktop (od 1100 px): biała forma ze znaku jako tło, portret przed nią,
+             dół dociśnięty do dolnej krawędzi pola. Poniżej 1100 px sam portret pod przyciskiem.
+             eager + fetchpriority: portret jest kandydatem na LCP pierwszego ekranu. -->
+        <div class="hero-scena">
+          <!-- Kształt w atrybucie d to klatka spoczynkowa — app.js (punkt 8) przelicza go w każdej klatce. -->
+          <div class="hero-form" aria-hidden="true">
           <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" focusable="false">
             <path class="blob" data-blob fill="#fff" d="M200.0 36.6C240.0 37.1 291.4 54.3 318.5 81.5C345.6 108.8 363.8 161.8 362.4 200.0C361.1 238.2 337.7 289.7 310.6 310.6C283.5 331.5 234.1 328.3 200.0 325.5C165.9 322.7 135.5 314.7 106.2 293.8C76.8 272.9 28.4 235.9 23.8 200.0C19.2 164.1 49.0 105.6 78.4 78.4C107.8 51.2 160.0 36.1 200.0 36.6Z"/>
           </svg>
+        </div>
+          <picture class="hero-portret">
+            <source srcset="portret-km.webp" type="image/webp">
+            <img src="portret-km.png" alt="Korneliusz Mydlak" width="1044" height="1518" loading="eager" fetchpriority="high" decoding="async">
+          </picture>
         </div>
       </div>
 
@@ -124,7 +139,7 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
        żeby zasłoniło wejście w całości, zanim oba ruszą dalej razem. -->
   <section class="band band--paper punkt" id="punkt-wyjscia" aria-label="Punkt wyjścia" data-warstwa="wyjscie">
     <div class="wrap">
-      <!-- data-redact: tekst wyłania się słowo po słowie spod czarnych belek w miarę przewijania (app.js, punkt 7a). -->
+      <!-- data-redact: po wejściu akapitu w widok tekst sam wyłania się słowo po słowie spod belek w ok. 1,2 s (app.js, punkt 7a). -->
       <div class="prose prose--stmt" data-redact>
         <p>Wynik marki zależy od kilku rzeczy naraz: kampanii, cen i&nbsp;rabatów, oferty, sklepu i&nbsp;kosztów dostawy. Zazwyczaj każdym z&nbsp;tych obszarów zajmuje się ktoś inny, a&nbsp;za to, czy wzrost się opłaca, nie odpowiada nikt. Zanim zwiększę budżet reklamowy, sprawdzam, gdzie firma traci sprzedaż i&nbsp;marżę.</p>
       </div>
@@ -144,8 +159,8 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
       <div class="kwal-blok">
         <h3 class="kwal-etykieta">Pracuję z&nbsp;markami, które</h3>
         <ul class="kwal-lista" data-rows>
-          <li><strong>produkują lub posiadają własną markę</strong> i&nbsp;sprzedają bezpośrednio do klientów</li>
-          <li>działają w&nbsp;<strong>modzie, kosmetykach, FMCG lub usługach</strong></li>
+          <li><strong>produkują lub mają własną markę</strong> i&nbsp;sprzedają bezpośrednio klientom, <strong>z&nbsp;obrotem od ok. 2&nbsp;mln zł rocznie</strong></li>
+          <li>działają w&nbsp;<strong>modzie, kosmetykach, suplementach lub FMCG</strong></li>
         </ul>
       </div>
 
@@ -155,105 +170,13 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
           <li>marka urosła na jednym kanale i&nbsp;<strong>od kilku kwartałów stoi w&nbsp;miejscu</strong> pomimo zwiększenia nakładów</li>
           <li><strong>agencja pokazuje dobry ROAS</strong>, a&nbsp;wynik firmy się nie poprawia</li>
           <li>masz zespół, który wykonuje, ale <strong>nikt nie łączy kampanii, sklepu, oferty i&nbsp;marży</strong></li>
-          <li>potrzebujesz eksperta od marketingu, ale <strong>nie jesteś gotowy na etat CMO</strong></li>
+          <li>potrzebujesz <strong>doświadczenia CMO, ale nie etatu CMO</strong></li>
         </ul>
       </div>
     </div>
   </section>
 
-  <!-- 4 · BIEL: schemat układu. Pięć kół zachodzi na siebie — każde dotyka środka
-       i co najmniej jednego sąsiada, więc układ czyta się jako jedna całość.
-       Przy wejściu koła zjeżdżają się z rozsuniętych pozycji do środka (app.js, punkt 3).
-       Koło to wyjątek od border-radius:0, bierze się wprost z kropki w znaku. -->
-  <section id="kompetencje" class="band band--paper" data-warstwa="wejscie wyjscie">
-    <div class="wrap">
-      <h2 class="h-sec h-sec--wide" data-mask>Pięć obszarów,<br>jedna odpowiedzialność.</h2>
-
-      <ul class="kola" data-kola>
-        <li class="is-hub">Growth<br>management</li>
-        <li>Kampanie<br>płatne</li>
-        <li>Sklep<br>i konwersja</li>
-        <li>Strategia<br>i marka</li>
-        <li>Kreacja<br>i produkcja</li>
-      </ul>
-
-      <p class="lead kola-note" data-reveal>Zamiast czterech wykonawców, z&nbsp;których każdy broni swojego wyniku, masz jedną osobę odpowiedzialną za to, czy całość się opłaca.</p>
-    </div>
-  </section>
-
-  <!-- 5 · MIST: obszary. Na desktopie kadr staje w miejscu, a przewijanie przełącza opisy
-       po kolei — zawsze widać dokładnie jeden (app.js, punkt 4). Linia przy liście pokazuje postęp.
-       Bez numeracji „01 / 05” — kolejność niesie lista po lewej i oś postępu.
-       Na telefonie opisy są kartami, które nachodzą na siebie. Bez skryptu: zwykła lista. -->
-  <section id="obszary" class="band band--mist obszary" aria-labelledby="obszary-tytul" data-obszary data-warstwa="wejscie wyjscie">
-    <div class="obszary-tor">
-      <div class="obszary-kadr">
-        <div class="wrap">
-          <h2 class="obszary-tytul" id="obszary-tytul" data-reveal>Zakres usług</h2>
-
-          <div class="obszary-uklad">
-            <nav class="obszary-nav" aria-label="Obszary">
-              <div class="obszary-os">
-                <ol class="obszary-lista">
-                  <li><a href="#obszar-growth">Growth management</a></li>
-                  <li><a href="#obszar-kampanie">Kampanie płatne</a></li>
-                  <li><a href="#obszar-sklep">Sklep i&nbsp;konwersja</a></li>
-                  <li><a href="#obszar-strategia">Strategia i&nbsp;marka</a></li>
-                  <li><a href="#obszar-kreacja">Kreacja i&nbsp;produkcja</a></li>
-                </ol>
-              </div>
-            </nav>
-
-            <div class="obszary-opisy">
-              <article class="obszar" id="obszar-growth" data-obszar>
-                <div data-reveal data-reveal-scope>
-                  <h3>Growth management</h3>
-                  <p>Zarządzam wzrostem firmy jako całością i&nbsp;odpowiadam za to, żeby wzrost sprzedaży był rentowny. Analizuję dane, kampanie, sklep, kreację i&nbsp;markę, aby ustalić, co faktycznie przynosi przychód, a&nbsp;co generuje koszty bez zwrotu. Na tej podstawie przygotowuję plan działań i&nbsp;go wdrażam, przy jednoczesnym trzymaniu dyscypliny kosztowej.</p>
-                </div>
-              </article>
-
-              <article class="obszar" id="obszar-kampanie" data-obszar>
-                <div data-reveal data-reveal-scope>
-                  <h3>Kampanie płatne</h3>
-                  <p>Konfiguruję pomiar i&nbsp;strukturę kont, nadzoruję teksty i&nbsp;dobieram kreacje. Efekty oceniam przez koszt pozyskania zamówienia lub leada i&nbsp;marżę po kosztach reklamy, sprawdzając je w&nbsp;danych sklepu, nie tylko w&nbsp;panelach reklamowych.</p>
-                  <ul class="comp-tags" aria-label="Kanały kampanii płatnych">
-                    <li>Meta Ads</li>
-                    <li>Google Ads</li>
-                    <li>TikTok Ads</li>
-                    <li>LinkedIn Ads</li>
-                    <li>ChatGPT Ads</li>
-                  </ul>
-                </div>
-              </article>
-
-              <article class="obszar" id="obszar-sklep" data-obszar>
-                <div data-reveal data-reveal-scope>
-                  <h3>Sklep, ścieżka zakupowa i&nbsp;konwersja</h3>
-                  <p>Analizuję ścieżkę zakupową i&nbsp;wskazuję, gdzie sklep traci klientów: na karcie produktu, w&nbsp;koszyku, przy wyborze dostawy i&nbsp;płatności. Na podstawie danych i&nbsp;nagrań sesji projektuję zmiany, a&nbsp;ich wdrożenie prowadzę razem z&nbsp;deweloperem. Gdy zmiana wymaga przebudowy sklepu, piszę brief i&nbsp;odbieram prace od Twojego zespołu lub sprawdzonego podwykonawcy.</p>
-                </div>
-              </article>
-
-              <article class="obszar" id="obszar-strategia" data-obszar>
-                <div data-reveal data-reveal-scope>
-                  <h3>Strategia i&nbsp;marka</h3>
-                  <p>Określam, do kogo marka mówi i&nbsp;czym się wyróżnia, a&nbsp;potem pilnuję, żeby kampanie, sklep i&nbsp;media społecznościowe mówiły tym samym głosem. Od 14 lat tworzę strategie marek modowych i&nbsp;FMCG. Odpowiadałem między innymi za rebranding dużej sieci sklepów odzieżowych: od koncepcji po wdrożenie w&nbsp;sklepach i&nbsp;komunikację z&nbsp;klientami.</p>
-                </div>
-              </article>
-
-              <article class="obszar" id="obszar-kreacja" data-obszar>
-                <div data-reveal data-reveal-scope>
-                  <h3>Koncepcje kreatywne i&nbsp;produkcja</h3>
-                  <p>Tworzę koncepcje, które da się streścić w&nbsp;jednym zdaniu i&nbsp;konsekwentnie przełożyć na reklamy, sklep oraz media społecznościowe. Przygotowuję briefy, dobieram wykonawców i&nbsp;nadzoruję produkcję zdjęć produktowych, sesji wizerunkowych i&nbsp;wideo do reklam. Koszt realizacji szacuję, zanim przedstawię pomysł.</p>
-                </div>
-              </article>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 6 · BIEL: kto za tym stoi. Portret stoi na kole Ultra — tej samej kropce co w znaku
+  <!-- 4 · BIEL: kto za tym stoi. Portret stoi na kole Ultra — tej samej kropce co w znaku
        i w hero. Koło rośnie, portret odsłania się od dołu.
        Dół portretu jest dociśnięty do krawędzi pola, więc cięcie w pasie czyta się jako zamierzone. -->
   <section id="o-mnie" class="band band--paper omnie" aria-labelledby="omnie-tytul" data-warstwa="wejscie wyjscie">
@@ -272,7 +195,7 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
 
         <div class="prose omnie-proza" data-reveal data-reveal-scope>
           <p>Nazywam się Korneliusz Mydlak, marketing prowadzę od 2011 roku. W&nbsp;Trec Nutrition (Grupa Aflofarm) byłem Head of Marketing&nbsp;&amp; <span class="bez-lamania">E-commerce</span>. W&nbsp;kaes. (Grupa CCC) byłem Head of Marketing, a&nbsp;sieć urosła w&nbsp;tym czasie z&nbsp;46 do 150 sklepów.</p>
-          <p>Dziś prowadzę growth management, czyli odpowiadam za to, jak rośnie sprzedaż. Celowo pracuję z&nbsp;kilkoma firmami naraz. Rozmawiasz ze mną i&nbsp;to ja analizuję Twoje dane.</p>
+          <p>Dziś prowadzę growth management, czyli odpowiadam za to, jak rośnie sprzedaż. Pracuję z&nbsp;kilkoma markami naraz, bo growth managementu nie da się prowadzić z&nbsp;doskoku. Rozmawiasz ze mną i&nbsp;to ja analizuję Twoje dane.</p>
         </div>
 
         <div class="omnie-dorobek" data-reveal data-reveal-scope>
@@ -287,7 +210,7 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
           </div>
 
           <div class="omnie-blok">
-            <h3 class="omnie-etykieta">Współpraca</h3>
+            <h3 class="omnie-etykieta omnie-etykieta--zdanie">Wcześniej, w&nbsp;agencji i&nbsp;po stronie marki, pracowałem m.in. dla:</h3>
             <ul class="omnie-marki">
               <li>4F</li><li>Cropp</li><li>GAP</li><li>House</li><li>MTV</li><li>New Balance</li><li>Nickelodeon</li><li>Oceanic S.A.</li><li>Prosto</li><li>Puma</li><li>Tom Tailor</li>
             </ul>
@@ -296,6 +219,100 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
       </div>
     </div>
   </section>
+
+  <!-- 5 · MIST: schemat układu. Pięć kół zachodzi na siebie — każde dotyka środka
+       i co najmniej jednego sąsiada, więc układ czyta się jako jedna całość.
+       Przy wejściu koła zjeżdżają się z rozsuniętych pozycji do środka (app.js, punkt 3).
+       Koło to wyjątek od border-radius:0, bierze się wprost z kropki w znaku. -->
+  <section id="kompetencje" class="band band--mist" data-warstwa="wejscie wyjscie">
+    <div class="wrap">
+      <h2 class="h-sec h-sec--wide" data-mask>Pięć obszarów,<br>jedna odpowiedzialność.</h2>
+
+      <ul class="kola" data-kola>
+        <li class="is-hub">Growth<br>management</li>
+        <li>Kampanie<br>płatne</li>
+        <li>Sklep<br>i konwersja</li>
+        <li>Strategia<br>i marka</li>
+        <li>Kreacja<br>i produkcja</li>
+      </ul>
+
+      <p class="lead kola-note" data-reveal>Zamiast czterech wykonawców, z&nbsp;których każdy broni swojego wyniku, masz jedną osobę odpowiedzialną za to, czy całość się opłaca.</p>
+    </div>
+  </section>
+
+  <!-- 6 · BIEL: zakres usług. Od 760 px akordeon: nagłówki stają się przyciskami (app.js, punkt 4),
+       pierwszy opis otwarty, można otworzyć kilka naraz. Poniżej 760 px i bez skryptu
+       wszystkie opisy stoją rozwinięte. Pierwsze zdanie opisu pogrubione — niesie sens przy skanowaniu. -->
+  <section id="obszary" class="band band--paper obszary" aria-labelledby="obszary-tytul" data-obszary data-warstwa="wejscie wyjscie">
+    <div class="wrap">
+      <h2 class="obszary-tytul" id="obszary-tytul" data-reveal>Zakres usług</h2>
+
+      <div class="obszary-akordeon">
+        <article class="obszar" id="obszar-growth">
+          <div data-reveal data-reveal-scope>
+            <h3 class="obszar-naglowek">Growth management</h3>
+            <div class="obszar-tresc" id="obszar-growth-tresc">
+              <div class="obszar-tresc-in">
+                <p><strong>Zarządzam wzrostem firmy jako całością i&nbsp;odpowiadam za to, żeby wzrost sprzedaży był rentowny.</strong> Analizuję dane, kampanie, sklep, kreację i&nbsp;markę, aby ustalić, co faktycznie przynosi przychód, a&nbsp;co generuje koszty bez zwrotu. Na tej podstawie przygotowuję plan działań i&nbsp;go wdrażam, przy jednoczesnym trzymaniu dyscypliny kosztowej.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="obszar" id="obszar-kampanie">
+          <div data-reveal data-reveal-scope>
+            <h3 class="obszar-naglowek">Kampanie płatne</h3>
+            <div class="obszar-tresc" id="obszar-kampanie-tresc">
+              <div class="obszar-tresc-in">
+                <p><strong>Konfiguruję pomiar i&nbsp;strukturę kont, nadzoruję teksty i&nbsp;dobieram kreacje.</strong> Efekty oceniam przez koszt pozyskania zamówienia lub leada i&nbsp;marżę po kosztach reklamy, sprawdzając je w&nbsp;danych sklepu, nie tylko w&nbsp;panelach reklamowych.</p>
+                <ul class="comp-tags" aria-label="Kanały kampanii płatnych">
+                  <li>Meta Ads</li>
+                  <li>Google Ads</li>
+                  <li>TikTok Ads</li>
+                  <li>LinkedIn Ads</li>
+                  <li>ChatGPT Ads</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="obszar" id="obszar-sklep">
+          <div data-reveal data-reveal-scope>
+            <h3 class="obszar-naglowek">Sklep, ścieżka zakupowa i&nbsp;konwersja</h3>
+            <div class="obszar-tresc" id="obszar-sklep-tresc">
+              <div class="obszar-tresc-in">
+                <p><strong>Analizuję ścieżkę zakupową i&nbsp;wskazuję, gdzie sklep traci klientów: na karcie produktu, w&nbsp;koszyku, przy wyborze dostawy i&nbsp;płatności.</strong> Na podstawie danych i&nbsp;nagrań sesji projektuję zmiany, a&nbsp;ich wdrożenie prowadzę razem z&nbsp;deweloperem. Gdy zmiana wymaga przebudowy sklepu, piszę brief i&nbsp;odbieram prace od Twojego zespołu lub sprawdzonego podwykonawcy.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="obszar" id="obszar-strategia">
+          <div data-reveal data-reveal-scope>
+            <h3 class="obszar-naglowek">Strategia i&nbsp;marka</h3>
+            <div class="obszar-tresc" id="obszar-strategia-tresc">
+              <div class="obszar-tresc-in">
+                <p><strong>Określam, do kogo marka mówi i&nbsp;czym się wyróżnia, a&nbsp;potem pilnuję, żeby kampanie, sklep i&nbsp;media społecznościowe mówiły tym samym głosem.</strong> Od 14 lat tworzę strategie marek modowych i&nbsp;FMCG. Odpowiadałem między innymi za rebranding dużej sieci sklepów odzieżowych: od koncepcji po wdrożenie w&nbsp;sklepach i&nbsp;komunikację z&nbsp;klientami.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="obszar" id="obszar-kreacja">
+          <div data-reveal data-reveal-scope>
+            <h3 class="obszar-naglowek">Koncepcje kreatywne i&nbsp;produkcja</h3>
+            <div class="obszar-tresc" id="obszar-kreacja-tresc">
+              <div class="obszar-tresc-in">
+                <p><strong>Tworzę koncepcje, które da się streścić w&nbsp;jednym zdaniu i&nbsp;konsekwentnie przełożyć na reklamy, sklep oraz media społecznościowe.</strong> Przygotowuję briefy, dobieram wykonawców i&nbsp;nadzoruję produkcję zdjęć produktowych, sesji wizerunkowych i&nbsp;wideo do reklam. Koszt realizacji szacuję, zanim przedstawię pomysł.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
 
   <!-- data-warstwa (app.js, punkt 6a): głębia między sekcjami na desktopie.
        „wejscie” — treść dogania pole od dołu, „wyjscie” — zostaje w tyle i chowa się pod następnym polem.
@@ -329,8 +346,8 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
           <p>Poznaję Twój model sprzedaży i&nbsp;cele na najbliższe miesiące. Po rozmowie wiesz, czy i&nbsp;w&nbsp;jakim zakresie mogę pomóc.</p>
         </li>
         <li data-reveal>
-          <h3>Diagnoza i&nbsp;plan</h3>
-          <p class="steps-meta">kilka tygodni, wycena po rozmowie</p>
+          <h3>Diagnoza wzrostu</h3>
+          <p class="steps-meta">2–4 tygodnie, stała cena ustalana po rozmowie</p>
           <p>Analizuję dane, kampanie, sklep i&nbsp;komunikację. Otrzymujesz pisemny plan: co ogranicza wzrost, od czego zaczynamy, ile to kosztuje i&nbsp;kiedy może się zwrócić. Plan zostaje u&nbsp;Ciebie, nawet jeśli nie będziemy współpracować dalej.</p>
         </li>
         <li data-reveal>
@@ -342,22 +359,19 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
     </div>
   </section>
 
-  <!-- 9 · ULTRA: wyjście. Jedno słowo na całą szerokość pola.
-       LinkedIn stoi w jednym rzędzie z mailem — dwa równorzędne kanały, nie przypis.
+  <!-- 9 · ULTRA: wyjście. Zaproszenie do rozmowy w skali planszy.
+       Dwa kanały ułożone typograficznie, jeden pod drugim, bez linii i kolumn.
+       LinkedIn zostaje w stopce — tu byłby trzecim, słabszym poziomem i rozbijał blok.
        Na dole pełny znak w tle: wysuwa się spod krawędzi i staje w całości. -->
   <section id="kontakt" class="band band--ultra kontakt" data-ton="ultra" data-warstwa="wejscie">
     <div class="wrap">
-      <h2 class="kontakt-tytul" data-mask>Kontakt.</h2>
+      <h2 class="kontakt-tytul" data-mask>Porozmawiajmy o&nbsp;Twojej marce.</h2>
 
-      <p class="kontakt-lead" data-reveal>Napisz w&nbsp;2–3 zdaniach: co sprzedajesz i&nbsp;co dziś blokuje Twój wzrost.<br>Odpowiem z&nbsp;propozycją terminu rozmowy.</p>
+      <p class="kontakt-lead" data-reveal>Napisz albo zadzwoń, a&nbsp;umówimy <span class="bez-lamania">30-minutową</span> rozmowę. W&nbsp;mailu wystarczą 2–3 zdania: co sprzedajesz i&nbsp;co dziś blokuje wzrost.</p>
 
-      <div class="kontakt-kanaly" data-reveal>
-        <a class="mailto" href="mailto:kontakt@bigideastudio.eu">kontakt@bigideastudio.eu</a>
-        <a class="kontakt-in" href="https://www.linkedin.com/in/korneliuszmydlak/" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6.94 5a2 2 0 1 1-4-.002 2 2 0 0 1 4 .002zM7 8.48H3V21h4V8.48zm6.32 0H9.34V21h3.94v-6.57c0-3.66 4.77-4 4.77 0V21H22v-7.93c0-6.17-7.06-5.94-8.72-2.91l.04-1.68z"/></svg>
-          <span>LinkedIn</span>
-          <span class="sr-only">(otwiera się w&nbsp;nowej karcie)</span>
-        </a>
+      <div class="kontakt-kanaly">
+        <p class="kontakt-glowny" data-reveal><a class="kontakt-link" href="mailto:kontakt@bigideastudio.eu">kontakt@bigideastudio.eu</a></p>
+        <p class="kontakt-glowny" data-reveal><a class="kontakt-link" href="tel:+48604098309"><span class="sr-only">Telefon: </span>604&nbsp;098&nbsp;309</a></p>
       </div>
 
       <div class="sygnatura-rama" data-anim aria-hidden="true">
@@ -386,8 +400,8 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
         <p class="stopka-etykieta">Strona</p>
         <ul>
           <li><a href="#dla-kogo"><span>Dla kogo pracuję</span></a></li>
-          <li><a href="#obszary"><span>Zakres usług</span></a></li>
           <li><a href="#o-mnie"><span>O&nbsp;mnie</span></a></li>
+          <li><a href="#obszary"><span>Zakres usług</span></a></li>
           <li><a href="#wspolpraca"><span>Współpraca</span></a></li>
         </ul>
       </nav>
@@ -395,6 +409,7 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
       <div class="stopka-kontakt">
         <p class="stopka-etykieta">Kontakt</p>
         <a class="stopka-mail" href="mailto:kontakt@bigideastudio.eu">kontakt@bigideastudio.eu</a>
+        <a class="stopka-mail" href="tel:+48604098309">604&nbsp;098&nbsp;309</a>
       </div>
     </div>
 
