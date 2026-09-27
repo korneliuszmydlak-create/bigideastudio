@@ -312,8 +312,7 @@ h1,h2,h3{
 }
 
 /* Tekst zawsze pierwszy w kodzie i w kolejności czytania.
-   Na desktopie i tablecie forma stoi obok lub pod tekstem; na telefonie wizualnie
-   wchodzi nad nagłówek (order), ale w kodzie i dla czytnika ekranu tekst zostaje pierwszy. */
+   Od 1100 px forma z portretem stoi obok tekstu; poniżej portret jest tylko awatarem w podpisie. */
 @media (min-width:1100px){
   .hero-body{
     display:grid;
@@ -389,37 +388,56 @@ h1,h2,h3{
 
 /* --- scena w hero: portret przed formą ze znaku ------------------------- */
 
-/* Poniżej 1100 px: sam portret pod przyciskiem, bez formy (app.js, punkt 8, wstrzymuje wtedy animację).
-   Dół dociśnięty do dolnej krawędzi pola — ujemny margines zjada dolny padding .hero-inner,
-   tak jak w „O mnie” cięcie w pasie czyta się jako zamierzone. Wysokość do 40svh,
-   żeby nagłówek, lead i przycisk zmieściły się nad nim na 390 × 844. */
+/* Poniżej 1100 px duży portret schodzi ze strony: stał pod przyciskiem na 40svh, po CTA wyglądał
+   na doklejony i dokładał ekran przewijania. Twarz niesie awatar w podpisie nad nagłówkiem. */
 .hero-scena{
+  display:none;
   position:relative;
-  align-self:center;
-  margin-top:auto;
-  margin-bottom:calc(var(--x) * -3);
 }
 
 .hero-form{display:none}
 
 .hero-portret{display:block;position:relative}
-.hero-portret img{
-  width:auto;
-  height:min(40svh, 520px);
-  max-width:100%;
-  object-fit:contain;
-  object-position:50% 100%;
+
+/* Podpis: portret w kole obok eyebrow, jak przy autorze tekstu — twarz przy „Prowadzony osobiście”,
+   zanim ktoś przeczyta nagłówek. W jednym rzędzie z eyebrow kosztuje ok. 20 px wysokości, więc
+   przycisk zostaje na pierwszym ekranie także na 375 × 667. Koło ze znaku, białe jak forma na desktopie.
+   Kadr: głowa i ramiona z pliku 1044 × 1518 — kwadrat 760 px od góry, oś twarzy na środku koła. */
+.hero-podpis{
+  display:flex;
+  align-items:center;
+  gap:calc(var(--x) * 1.8);
+  margin:0 0 calc(var(--x) * 2.5);
 }
 
-@supports not (height:40svh){
-  .hero-portret img{height:min(40vh, 520px)}
+.hero-podpis .hero-eyebrow{margin:0}
+
+.hero-awatar{
+  position:relative;
+  flex:none;
+  width:clamp(72px, 20vw, 96px);
+  aspect-ratio:1;
+  border-radius:50%;
+  overflow:hidden;
+  background:#fff;
+}
+
+.hero-awatar img{
+  position:absolute;
+  top:4%;                  /* oddech nad czubkiem głowy */
+  left:-18.4%;             /* 140 / 760 */
+  width:137.4%;            /* 1044 / 760 */
+  max-width:none;
+  height:auto;
 }
 
 @media (max-width:760px){
   .hero-inner{gap:calc(var(--x) * 1.5)}
+  /* Bez dużego portretu pod przyciskiem treść stoi w środku pola — wcześniej przy górnej krawędzi
+     zostawiała na 390 × 844 ok. 240 px pustego pasa pod CTA. Na niskich ekranach i tak wypełnia pole. */
   .hero-body{
     gap:calc(var(--x) * 3);
-    justify-content:flex-start;
+    justify-content:center;
     padding-top:clamp(calc(var(--x) * 1.5), 3svh, calc(var(--x) * 5));
   }
 }
@@ -429,15 +447,22 @@ h1,h2,h3{
    Szerokość ograniczona też wysokością ekranu: portret nie może wejść pod logo. */
 @media (min-width:1100px){
   .hero-body{align-items:center}
+  .hero-podpis{display:block}
+  .hero-awatar{display:none}          /* na desktopie twarz niesie duży portret obok */
   .hero-scena{
+    display:block;
+    margin-bottom:calc(var(--x) * -3);   /* dół portretu na krawędzi pola */
     align-self:end;
     justify-self:end;
     margin-top:0;
     width:clamp(260px, min(32vw, calc((100svh - 150px) * .688)), 480px);
     margin-right:calc(-1 * clamp(0px, (100vw - 1180px) / 2 - 32px, 110px));
   }
+  /* Forma ze znaku za portretem wyłączona: przy portrecie mono biała koszulka zlewała się z białą formą
+     i sylwetka traciła kontur. Portret stoi wprost na Ultra. Powrót: display:block.
+     Pętla animacji w app.js (punkt 8) sama staje, bo ukryty kształt nie przecina ekranu. */
   .hero-form{
-    display:block;
+    display:none;
     position:absolute;
     left:-6%;
     top:-2%;
@@ -488,6 +513,14 @@ h1,h2,h3{
   transform:translate3d(0,calc(var(--cover,0) * -6vh),0) scale(calc(1 - var(--cover,0) * .05));
   transform-origin:50% 100%;
 }
+
+/* Paralaksa portretu: gdy „Punkt wyjścia” wjeżdża na hero, portret unosi się szybciej niż tekst
+   (-6vh w .hero-inner), a forma ze znaku wolniej — trzy warstwy, trzy prędkości.
+   Dół portretu odsłania się zawsze niżej niż czoło zasłony, więc cięcie w pasie nigdy nie wychodzi na wierzch.
+   Na telefonie twarz przesuwa się w obrębie koła. Bez kurtyny (ograniczony ruch) wszystko stoi. */
+.kurtyna.is-live .hero-portret{transform:translate3d(0,calc(var(--cover,0) * -16vh),0)}
+.kurtyna.is-live .hero-form{transform:translate3d(0,calc(var(--cover,0) * -7vh),0)}
+.kurtyna.is-live .hero-awatar img{transform:translate3d(0,calc(var(--cover,0) * -9%),0)}
 
 .kurtyna.is-live .punkt{position:relative;z-index:1}
 

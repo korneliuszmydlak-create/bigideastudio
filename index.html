@@ -30,7 +30,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&display=swap">
 <!-- ?v= wymusza pobranie nowej wersji mimo pamięci podręcznej przeglądarki i Cloudflare.
      Przy każdym wdrożeniu CSS lub JS podbij numer w obu linijkach. -->
-<link rel="stylesheet" href="style.css?v=34">
+<link rel="stylesheet" href="style.css?v=38">
 <!-- Intro z logo (app.js, punkt 10). Decyzja zapada tu, przed pierwszym malowaniem,
      żeby hero nie mignęło przed zasłoną. Intro gra raz na kartę przeglądarki, nie przy
      wejściu na kotwicę (np. #kontakt) i nie przy ograniczonym ruchu. -->
@@ -42,7 +42,7 @@ try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&
 document.documentElement.classList.add('js');
 setTimeout(function(){if(!window.bisApp)document.documentElement.classList.remove('js','intro')},3000);
 </script>
-<script src="app.js?v=34" defer></script>
+<script src="app.js?v=37" defer></script>
 </head>
 <body>
 
@@ -98,7 +98,15 @@ setTimeout(function(){if(!window.bisApp)document.documentElement.classList.remov
 
       <div class="hero-body">
         <div class="hero-text">
-          <p class="hero-eyebrow" data-reveal>Growth management dla marek D2C: moda, kosmetyki, suplementy</p>
+          <!-- Podpis: poniżej 1100 px portret w kole obok eyebrow. Ten sam plik co duży portret,
+               więc przeglądarka pobiera go raz. Od 1100 px awatar ukryty, a eyebrow stoi sam. -->
+          <div class="hero-podpis" data-reveal>
+            <picture class="hero-awatar">
+              <source srcset="portret-km.webp?v=8" type="image/webp">
+              <img src="portret-km.png?v=8" alt="Korneliusz Mydlak" width="1044" height="1518" loading="eager" decoding="async">
+            </picture>
+            <p class="hero-eyebrow">Growth management dla marek D2C: moda, kosmetyki, suplementy</p>
+          </div>
           <h1 class="h-hero" data-mask>Rentowny wzrost<br>Twojej marki.<br><span class="h-hero-dop">Prowadzony osobiście.</span></h1>
 
           <p class="lead hero-lead" data-reveal>Jestem Korneliusz Mydlak. Przez 14 lat odpowiadałem za marketing po stronie marek, m.in. jako Head of Marketing w&nbsp;kaes. (Grupa CCC) i&nbsp;Trec Nutrition (Grupa Aflofarm). Dziś jako zewnętrzny growth manager łączę kampanie, sklep, ofertę i&nbsp;marżę w&nbsp;jeden plan i&nbsp;sam go prowadzę.</p>
@@ -114,9 +122,14 @@ setTimeout(function(){if(!window.bisApp)document.documentElement.classList.remov
         </div>
 
         <!-- Portret w hero. W kodzie za tekstem, więc czytnik ekranu zaczyna od nagłówka.
-             Desktop (od 1100 px): biała forma ze znaku jako tło, portret przed nią,
-             dół dociśnięty do dolnej krawędzi pola. Poniżej 1100 px sam portret pod przyciskiem.
-             eager + fetchpriority: portret jest kandydatem na LCP pierwszego ekranu. -->
+             Desktop (od 1100 px): portret mono wprost na Ultra (forma ze znaku wyłączona w style.css),
+             dół dociśnięty do dolnej krawędzi pola. Poniżej 1100 px ukryty — twarz niesie awatar w podpisie nad nagłówkiem.
+             eager + fetchpriority: portret jest kandydatem na LCP pierwszego ekranu.
+             Portret wycięty od nowa z oryginału sesji (IMG_4826), wycinka na poziomie włosa.
+             Czerń i biel w kierunku klika.digital, obróbka zapisana w pliku, nie filtrem CSS.
+             Kadr 1044 × 1518 zgodny z poprzednią wersją — od niego zależy kadr awatara w kole na mobile.
+             Czerwony nadruk na koszulce przestaje walczyć z Ultra.
+             ?v= przy zdjęciach podbijać przy każdej podmianie pliku. -->
         <div class="hero-scena">
           <!-- Kształt w atrybucie d to klatka spoczynkowa — app.js (punkt 8) przelicza go w każdej klatce. -->
           <div class="hero-form" aria-hidden="true">
@@ -125,8 +138,8 @@ setTimeout(function(){if(!window.bisApp)document.documentElement.classList.remov
           </svg>
         </div>
           <picture class="hero-portret">
-            <source srcset="portret-km.webp" type="image/webp">
-            <img src="portret-km.png" alt="Korneliusz Mydlak" width="1044" height="1518" loading="eager" fetchpriority="high" decoding="async">
+            <source srcset="portret-km.webp?v=8" type="image/webp">
+            <img src="portret-km.png?v=8" alt="Korneliusz Mydlak" width="1044" height="1518" loading="eager" fetchpriority="high" decoding="async">
           </picture>
         </div>
       </div>
@@ -139,7 +152,7 @@ setTimeout(function(){if(!window.bisApp)document.documentElement.classList.remov
        żeby zasłoniło wejście w całości, zanim oba ruszą dalej razem. -->
   <section class="band band--paper punkt" id="punkt-wyjscia" aria-label="Punkt wyjścia" data-warstwa="wyjscie">
     <div class="wrap">
-      <!-- data-redact: po wejściu akapitu w widok tekst sam wyłania się słowo po słowie spod belek w ok. 1,2 s (app.js, punkt 7a). -->
+      <!-- data-redact: po wejściu akapitu w widok tekst sam wyłania się słowo po słowie spod belek w ok. 1,4 s, gdy góra akapitu minie 60% ekranu (app.js, punkt 7a). -->
       <div class="prose prose--stmt" data-redact>
         <p>Wynik marki zależy od kilku rzeczy naraz: kampanii, cen i&nbsp;rabatów, oferty, sklepu i&nbsp;kosztów dostawy. Zazwyczaj każdym z&nbsp;tych obszarów zajmuje się ktoś inny, a&nbsp;za to, czy wzrost się opłaca, nie odpowiada nikt. Zanim zwiększę budżet reklamowy, sprawdzam, gdzie firma traci sprzedaż i&nbsp;marżę.</p>
       </div>
@@ -184,8 +197,8 @@ setTimeout(function(){if(!window.bisApp)document.documentElement.classList.remov
       <div class="omnie-scena" data-anim>
         <span class="omnie-kolo-px" data-px="-60" aria-hidden="true"><span class="omnie-kolo"></span></span>
         <picture class="omnie-portret">
-          <source srcset="portret-km.webp" type="image/webp">
-          <img src="portret-km.png" alt="Korneliusz Mydlak" width="1044" height="1518" loading="lazy" decoding="async">
+          <source srcset="portret-km.webp?v=8" type="image/webp">
+          <img src="portret-km.png?v=8" alt="Korneliusz Mydlak" width="1044" height="1518" loading="lazy" decoding="async">
         </picture>
       </div>
 

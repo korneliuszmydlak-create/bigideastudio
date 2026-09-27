@@ -503,9 +503,11 @@
 
   /* 7a. Teza spod belek. Tekst dzielony na słowa (każde razem ze spacją za nim, więc belki
      łączą się w ciągły pas). Słowa przed czołem są jawne, 7 kolejnych stoi pod belką,
-     reszta czeka niewidoczna. Odsłanianie rusza samo, gdy 30% akapitu jest na ekranie,
-     i trwa ok. 1,2 s — nie zależy od dalszego przewijania (wcześniej czoło szło za pozycją
+     reszta czeka niewidoczna. Odsłanianie rusza samo, gdy góra akapitu minie 60% wysokości ekranu,
+     i trwa ok. 1,4 s — nie zależy od dalszego przewijania (wcześniej czoło szło za pozycją
      i kto zatrzymał się w pół drogi, widział pół zdania pod belkami).
+     Start przy 60%, nie przy 30% widoczności akapitu: sekcja wjeżdża kurtyną na hero, więc przy 30%
+     tekst był jeszcze przy dolnej krawędzi i animacja kończyła się, zanim wzrok tam doszedł.
      Przy ograniczonym ruchu i bez skryptu tekst stoi w całości. */
   var redact = document.querySelector('[data-redact]');
 
@@ -531,7 +533,7 @@
     };
     tnij(redact);
 
-    var FALA = 7, CZAS_R = 1200;
+    var FALA = 7, CZAS_R = 1400;
     var czolo = -1;
     redact.classList.add('is-redact');
 
@@ -559,7 +561,7 @@
       if (!entries[0].isIntersecting) return;
       redactIO.disconnect();
       window.requestAnimationFrame(krokR);
-    }, { threshold: 0.3 });
+    }, { rootMargin: '0px 0px -40% 0px', threshold: 0 });
     redactIO.observe(redact);
   }
 
