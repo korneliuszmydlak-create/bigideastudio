@@ -212,7 +212,8 @@
   /* 5. Scena: wspólne tło planszy, współpracy i kontaktu, mieszane ze scrollem.
      Trzy warstwy płynności:
      a) Czysty ton jest w trzech punktach: plansza — gdy wypełnia ekran (do tego momentu
-        stoi w oryginalnej Ultra z białym tekstem), grafit — w środku sceny, Ultra — gdy góra kontaktu jest na 20% wysokości ekranu
+        stoi w oryginalnej Ultra z białym tekstem), grafit — w środku sceny (na mobile: od wejścia
+        nagłówka „Pracujemy 1:1” do końca kroków), Ultra — gdy góra kontaktu jest na 20% wysokości ekranu
         (od tego miejsca do końca strony kontakt stoi w oryginalnej Ultra z bielą).
      b) Mieszanie w OKLab, liniowo: równy kawałek przewinięcia = równa, widoczna zmiana barwy.
      c) Wygładzanie w czasie. Kółko myszy przesuwa stronę skokami po ~100 px — gdyby kolor
@@ -289,20 +290,32 @@
         // Punkty czystego tonu w pikselach dokumentu. Liczone przy starcie i zmianie rozmiaru,
         // nie w każdej klatce — przewijanie nie zmienia układu.
         var punkty = [];
+        var mqWaski = window.matchMedia ? window.matchMedia('(max-width: 760px)') : null;
         var zmierz = function () {
           var vh = wysokosc(), sy = window.pageYOffset;
           var maxY = document.documentElement.scrollHeight - vh;
-          punkty = tony.map(function (el, i) {
-            var r = el.getBoundingClientRect(), top = r.top + sy, y;
-            if (i === 0) y = top;                                 // plansza wypełnia ekran — czysta Ultra z bielą
-            else if (i === tony.length - 1) y = Math.min(top - vh * .2, maxY);  // kontakt: czysta Ultra, zanim nagłówek dojdzie do góry ekranu
-            else y = top + r.height / 2 - vh / 2;
-            return { y: y, ton: PALETA[el.getAttribute('data-ton')] };
+          var waski = !!(mqWaski && mqWaski.matches);
+          punkty = [];
+          tony.forEach(function (el, i) {
+            var r = el.getBoundingClientRect(), top = r.top + sy, ton = PALETA[el.getAttribute('data-ton')];
+            if (i === 0) punkty.push({ y: top, ton: ton });      // plansza wypełnia ekran — czysta Ultra z bielą
+            else if (i === tony.length - 1) punkty.push({ y: Math.min(top - vh * .2, maxY), ton: ton });  // kontakt: czysta Ultra, zanim nagłówek dojdzie do góry ekranu
+            else if (waski) {
+              // Mobile: sekcja jest kilka ekranów wysoka (kroki jeden pod drugim), więc punkt „środek
+              // na środku ekranu” wypadał daleko za nagłówkiem — ten wjeżdżał jeszcze na Ultra.
+              // Tu ton ma plateau: pełny od chwili, gdy nagłówek wchodzi w dolne 15% ekranu,
+              // i trzyma się, aż dół sekcji dojdzie do dołu ekranu.
+              var h = el.querySelector('h2') || el;
+              var hTop = h.getBoundingClientRect().top + sy;
+              punkty.push({ y: hTop - vh * .85, ton: ton });
+              punkty.push({ y: top + r.height - vh, ton: ton });
+            }
+            else punkty.push({ y: top + r.height / 2 - vh / 2, ton: ton });
           });
-          // Sekcje środkowe: punkt w pół drogi między „środek na środku ekranu” a środkiem
+          // Desktop, sekcje środkowe: punkt w pół drogi między „środek na środku ekranu” a środkiem
           // całej sceny — obie połowy przejścia mają podobną długość, więc żadna nie jest stroma.
           var y0 = punkty[0].y, yN = punkty[punkty.length - 1].y;
-          for (var m = 1; m < punkty.length - 1; m++) {
+          for (var m = 1; !waski && m < punkty.length - 1; m++) {
             punkty[m].y = (punkty[m].y + (y0 + (yN - y0) * m / (punkty.length - 1))) / 2;
           }
           for (var k = 1; k < punkty.length; k++) {          // punkty muszą rosnąć
