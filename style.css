@@ -338,9 +338,8 @@ h1,h2,h3{
 }
 
 /* Trzy linie zamiast dwóch przy tej samej wysokości bloku co wcześniej (1440 × 900: ok. 223 px),
-   więc stopień hero zszedł z 86 do ok. 60 px. Trzecia linia w bieli 78% — dopowiedzenie,
-   nie trzeci akcent: bez tego trzy linie w 600 stały jak jedna ciężka plama. */
-.h-hero-dop{color:rgba(255,255,255,.78)}
+   więc stopień hero zszedł z 86 do ok. 60 px. Cały nagłówek w czystej bieli: „Prowadzony osobiście"
+   to wyróżnik oferty, nie dopowiedzenie — przygaszony czytał się jak przypis. */
 
 /* Lead w hero: tłumaczy nazwę usługi. Szersza miara niż .lead, bo 34ch dawało
    siedem wierszy i spychało przycisk pod pierwszy ekran. */
